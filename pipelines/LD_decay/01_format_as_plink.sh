@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-#SBATCH --mem=64G -p batch --nodes 1 --ntasks 2 --out reformat.log
+#SBATCH --mem=64G -p batch --nodes 1 --ntasks 2 --out logs/reformat.log
 
 #make the bed files that structure needs using plink
 module load plink
