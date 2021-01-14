@@ -4,15 +4,19 @@
 #make the bed files that structure needs using plink
 module load plink
 
+mkdir plink_files
+
 #Clade1
 for N in {1..50}; do \
-plink --vcf vcf/Clade_1_samp_${N}.recode_noinv.vcf --const-fid --allow-extra-chr  --vcf-idspace-to _ --keep-allele-order --make-bed --out Clade_1_samp${N}
+plink --vcf vcf/Clade_1_samp_${N}.recode_noinv.vcf --const-fid --allow-extra-chr  --vcf-idspace-to _ --keep-allele-order --make-bed --out plink_files/Clade_1_samp${N}
 done
 
 #Clade2
 for N in {1..50}; do \
-plink --vcf vcf/Clade_2_samp_${N}.recode_noinv.vcf --const-fid --allow-extra-chr  --vcf-idspace-to _ --keep-allele-order --make-bed --out Clade_2_samp${N}
+plink --vcf vcf/Clade_2_samp_${N}.recode_noinv.vcf --const-fid --allow-extra-chr  --vcf-idspace-to _ --keep-allele-order --make-bed --out plink_files/Clade_2_samp${N}
 done
 
 #Clade3
-plink --vcf vcf/Clade_3.recode_noinv.vcf --const-fid --allow-extra-chr  --vcf-idspace-to _ --keep-allele-order --make-bed --out Clade_3
+for N in {1..50}; do \
+plink --vcf vcf/Clade_3_samp_${N}.recode_noinv.vcf --const-fid --allow-extra-chr  --vcf-idspace-to _ --keep-allele-order --make-bed --out plink_files/Clade_3_samp${N}
+done
