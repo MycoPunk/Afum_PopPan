@@ -14,6 +14,11 @@ CM3720
 ...
 ```
 
-We use these txt files to create 50 random subsets of 8 strains per clade from the inclusive vcf using the script: *00_rarify_vcf.sh*
+We use these txt files to create 50 random subsets of 8 strains per clade from the inclusive vcf using step 00. step 01 changes each vcf subset into plink format.
 
+**00_rarify_vcf.sh**
 This script randomly sorts the .txt files of strain names, and takes the first 8 lines from each random assortment (repeated 50 times for each clade). Then, using these lists, the sampled strains are subset from the inclusive VCF file, invariant sites removed, and each file named by clade (1-3) and sample number (1-50). 
+
+
+**01_format_as_plink.sh** 
+This script recodes each subset vcf file into plink format. 
