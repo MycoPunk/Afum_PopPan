@@ -17,4 +17,4 @@ cat LD_out/Clade_3_samp${N}_LD_out.ld | sed 1,1d | awk -F " " 'function abs(v) {
 done
 
 #cleanup
-rm *ld
+rm LD_out/*_out.ld
