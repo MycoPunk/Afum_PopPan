@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-#SBATCH --mem=64G -p batch --nodes 1 --ntasks 2 --out rairfy.log
+#SBATCH --mem=64G -p batch --nodes 1 --ntasks 2 --out logs/rairfy.log
 
 #load modules 
 module load vcftools
