@@ -48,4 +48,5 @@ bcftools view -c 1 vcf/Clade_3_samp_${N}.recode.vcf -o vcf/Clade_3_samp_${N}.rec
 done
 
 #clean up 
-rm *temp*
+rm temp/*temp*
+rm vcf/*recode.vcf
