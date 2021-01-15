@@ -30,6 +30,6 @@ This script creates a summary of pairwise distances w/ distance in the first col
 
 **04_average_summaries.sh** runs th script **04_average_summaries.R** which generates the mean R2 value for each distance averaged over all 50 itterations, generating three files of mean R2 values (one for each clade).
 
-There are now two plotting scripts, which are run in **05_plot_LD.sh**
+There are now two plotting scripts, which are run in **05_plot_LD.sh** /
 **05_plot_LD_decay_zoomed_in.R** plots a zoomed in view of LD decay, over 10bp windows 
 **05_plot_LD_decay_LD50_in.R** plots LD decay over the entier length of the dataset, including arrows at LD50 for each clade
