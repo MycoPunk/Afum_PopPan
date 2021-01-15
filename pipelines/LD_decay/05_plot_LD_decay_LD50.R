@@ -12,7 +12,6 @@ rsq_means_Clade2 <- read.delim("rsq_means_Clade2.tab",sep="",header=T,check.name
 rsq_means_Clade3 <- read.delim("rsq_means_Clade3.tab",sep="",header=T,check.names=F,stringsAsFactors=F)
 
 
-
 #sliding window size = n 
 n <- 50
 #get average over sliding windows 
@@ -37,26 +36,25 @@ myCol <- c(Clade1 = "#56326E",
            Clade2 = "#ED7F6F",
            Clade3 = "#ABA778")
 
-
-#get group mean
+#get group means
 gm_1<- mean(rsq_means_Clade1$rsq.mean)
 gm_2<- mean(rsq_means_Clade2$rsq.mean)
 gm_3<- mean(rsq_means_Clade3$rsq.mean)
 gm<- data.frame(Clade = c("Clade1", "Clade2", "Clade3"), gm =c(gm_1,gm_2,gm_3))
 
-#find x values closest to these Y values 
-C1_y_index<- which.min(abs(rsq_means_Clade1$rsq.mean - gm_1))
-gm_1y<- rsq_means_Clade1[C1_y_index, 1]
+##find x values closest to these Y values 
+#calculate loess curves
+loess_C1 <- loess(rsq.mean~dist, rsq_means_Clade1_windows)
+loess_C2 <- loess(rsq.mean~dist, rsq_means_Clade2_windows)
+loess_C3 <- loess(rsq.mean~dist, rsq_means_Clade3_windows)
 
-C2_y_index<- which.min(abs(rsq_means_Clade2$rsq.mean - gm_2))
-gm_2y<- rsq_means_Clade2[C2_y_index, 1]
+#Approximate where x (distance) is given y
+gm_1x <- approx(x = loess_C1$fitted, y = loess_C1$x, xout = gm_1)$y
+gm_2x <- approx(x = loess_C2$fitted, y = loess_C2$x, xout = gm_2)$y
+gm_3x <- approx(x = loess_C3$fitted, y = loess_C3$x, xout = gm_3)$y
 
-C3_y_index<- which.min(abs(rsq_means_Clade3$rsq.mean - gm_3))
-gm_3y<- rsq_means_Clade3[C3_y_index, 1]
-
-#add these new intersection values
-gm$gm_y<- c(gm_1y, gm_2y, gm_3y)
-
+#add these new x intersection values
+gm$gm_x<- c(gm_1x, gm_2x, gm_3x)
 
 #plot
 sp<- ggplot(rsq_means, aes(x=dist,y=rsq.mean))+
@@ -74,7 +72,7 @@ sp + scale_color_manual(values=myCol) +
   geom_segment(aes(x = gm[2,3], y = .04, xend = gm[2,3], yend = 0), colour = "#ED7F6F",
                arrow = arrow(length = unit(0.18, "cm"), type = "closed")) +
   geom_segment(aes(x = gm[3,3], y = .04, xend = gm[3,3], yend = 0), colour = "#ABA778",
-               arrow = arrow(length = unit(0.18, "cm"), type = "closed")) +
+               arrow = arrow(length = unit(0.18, "cm"), type = "closed")) + 
   scale_x_log10()
 
 setwd("~/bigdata/pop_genomics/LD_decay/plots")
