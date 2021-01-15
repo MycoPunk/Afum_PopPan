@@ -3,6 +3,8 @@
 
 module load R
 
+mkdir plots
+
 Rscript pipeline/05_plot_LD_decay_zoomed_in.R
 
 Rscript pipeline/05_plot_LD_decay_LD50.R
