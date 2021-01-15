@@ -4,10 +4,11 @@ library(ggplot2)
 library(purrr)
 library(data.table)
 
+setwd("~/bigdata/pop_genomics/LD_decay/LD_out")
 
 #get median value for each distance
-rsq_means_Clade1 <- read.delim("rsq_means_Clade1_overall.tab",sep="",header=T,check.names=F,stringsAsFactors=F)
-rsq_means_Clade2 <- read.delim("rsq_means_Clade2_overall.tab",sep="",header=T,check.names=F,stringsAsFactors=F)
+rsq_means_Clade1 <- read.delim("rsq_means_Clade1.tab",sep="",header=T,check.names=F,stringsAsFactors=F)
+rsq_means_Clade2 <- read.delim("rsq_means_Clade2.tab",sep="",header=T,check.names=F,stringsAsFactors=F)
 rsq_means_Clade3 <- read.delim("rsq_means_Clade3.tab",sep="",header=T,check.names=F,stringsAsFactors=F)
 
 #shrink
@@ -50,4 +51,5 @@ sp<- ggplot(rsq_means_sm, aes(x=dist,y=rsq.mean))+
         axis.ticks=element_blank())
 sp + scale_color_manual(values=myCol)
 
-ggsave("LD_decay_plot_zoomedin.pdf", plot = last_plot())
+setwd("~/bigdata/pop_genomics/LD_decay/plots")
+ggsave("LD_decay_zoomed_in.pdf", plot = last_plot())
