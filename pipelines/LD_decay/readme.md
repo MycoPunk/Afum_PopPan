@@ -1,6 +1,6 @@
 This pipeline calculates Linkage Disequilibrium Decay. 
 
-In our main file, we have a set of .txt files (Clade_1_members.txt, #Clade_2_members.txt, Clade_3_members.txt) that consist of lists of species names for each clade (clad emembership determined previously using DAPCA)
+In the main directory, we have a set of .txt files (Clade_1_members.txt, Clade_2_members.txt, Clade_3_members.txt) that consist of lists of species names for each clade (clade membership determined previously using DAPCA)
 
 ```
 >cat Clade_3_members.txt
