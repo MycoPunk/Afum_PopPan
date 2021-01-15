@@ -32,4 +32,4 @@ This script creates a summary of pairwise distances w/ distance in the first col
 
 **05_plot_LD.sh** runs two plotting scripts:
 **05_plot_LD_decay_zoomed_in.R** plots a zoomed in view of LD decay, over 10bp windows, and
-**05_plot_LD_decay_LD50_in.R** plots LD decay over the entier length of the dataset, including arrows at LD50 for each clade
+**05_plot_LD_decay_LD50.R** plots LD decay over the entier length of the dataset, including arrows at LD50 for each clade
