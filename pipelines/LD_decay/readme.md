@@ -27,3 +27,5 @@ This script runs LD decay in plink
 
 **03_create_summary.sh**
 This script creates a summary of pairwise distances w/ distance in the first col, and R2 in the second. 
+
+**04_average_summaries.sh** runs th script **04_average_summaries.R** which generates the mean R2 value for each distance averaged over all 50 itterations, generating three files of mean R2 values (one for each clade).
