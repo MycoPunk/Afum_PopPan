@@ -11,7 +11,7 @@ module load tabix
 #SNPS
 bedtools subtract -a *SNP.combined_selected.vcf.gz -b ../genome/FungiDB-39_AfumigatusAf293_Genome.RM.tab -header > 262_strains.selected.SNP.NO_TEs.vcf 
 #INDELS
-bedtools subtract -a *SNP.combined_selected.vcf.gz -b ../genome/FungiDB-39_AfumigatusAf293_Genome.RM.tab -header > 262_strains.selected.INDEL.NO_TEs.vcf 
+bedtools subtract -a *INDEL.combined_selected.vcf.gz -b ../genome/FungiDB-39_AfumigatusAf293_Genome.RM.tab -header > 262_strains.selected.INDEL.NO_TEs.vcf 
 
 
 #compress
