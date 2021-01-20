@@ -76,4 +76,4 @@ sp + scale_color_manual(values=myCol) +
   scale_x_log10()
 
 setwd("~/bigdata/pop_genomics/LD_decay/plots")
-ggsave("LD_decay_wLD50.pdf", plot = last_plot())
+ggsave("LD_decay_wLD50.pdf", plot = last_plot(), width = 10, height = 8)
