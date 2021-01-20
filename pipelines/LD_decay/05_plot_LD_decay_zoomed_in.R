@@ -52,4 +52,4 @@ sp<- ggplot(rsq_means_sm, aes(x=dist,y=rsq.mean))+
 sp + scale_color_manual(values=myCol)
 
 setwd("~/bigdata/pop_genomics/LD_decay/plots")
-ggsave("LD_decay_zoomed_in.pdf", plot = last_plot())
+ggsave("LD_decay_zoomed_in.pdf", plot = last_plot(), width = 10, height = 8)
