@@ -56,6 +56,12 @@ name=$(basename "$i" .temp)
 awk '/^>/{$0=$0"-"(++i)}1' $i > $name.fasta
 done
 
+mkdir MAT1-1_hits  
+mkdir MAT1-2_hits   
+
+mv *MAT1-1.fasta MAT1-1_hits
+mv *MAT1-2.fasta MAT1-1_hits
+
 #clean up
 rm *carrot.fa 
 rm *.forfasta.out
