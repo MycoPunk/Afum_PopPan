@@ -60,7 +60,7 @@ mkdir MAT1-1_hits
 mkdir MAT1-2_hits   
 
 mv *MAT1-1.fasta MAT1-1_hits
-mv *MAT1-2.fasta MAT1-1_hits
+mv *MAT1-2.fasta MAT1-2_hits
 
 #clean up
 rm *carrot.fa 
