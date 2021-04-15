@@ -17,3 +17,6 @@ NOTE: symlink the raw reads (R1 and R2) for the strains of interest into the raw
 
 **Graph_depth_profiles_of_MAT_alignments.R**<br>
 This is an ugly, hardcoded, redundant script to visualize the depth profiles of the MAT alignments for the 9 strains (plus a control for both MAT-1 ad MAT-2) with significant alignments to both idiomorphs (included as a supplemental figure in the manuscript). 
+
+**Jellyfish.sh** <br> 
+Generates K-mer counts from raw whole genome data (I used forward reads only)  - note, these have to be unzipped first. 
