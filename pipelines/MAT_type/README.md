@@ -2,7 +2,7 @@
 
 
 **01_BLASTn_and_make_fastas.sh**<br>Runs BLASTn on the MAT idiomorphs and formats the significant hits as fasta files.<br>
-  NOTE: for MAT1 alignments this will be pretty binary (hit or no hit), but for MAT2 alignments, there is a trailing ~270 bp region that is conserved between MAT1 and MAT2, and will always align, MAT2 idomorph strains will have a a full alignment over the (~1078bp) MAT2 reference, whereas MAT1 idomorph strains will only align over the ~270bp conserved region of the MAT2 reference.
+  NOTE: for MAT1 alignments this will be pretty binary (hit or no hit), but for MAT2 alignments, there is a trailing ~270 bp region that is conserved between MAT1 and MAT2, and will always align, MAT2 idimorph strains will have a a full alignment over the (~1078bp) MAT2 reference, whereas MAT1 idiomorph strains will only align over the ~270bp conserved region of the MAT2 reference.
   
   
 **02_align_multi_fastas.sh**<br>This script runs a MAFT alignment of the above sequences, that you can view in your preferred viewer.
@@ -16,4 +16,4 @@ NOTE: symlink the raw reads (R1 and R2) for the strains of interest into the raw
 
 
 **Graph_depth_profiles_of_MAT_alignments.R**<br>
-This is an ugly, hardcoded, redundant script to visualize the depth profiles of the MAT alignments for the 9 strains (plus a control for both MAT-1 ad MAT-2) with significant alignments to both idomorphs (included as a supplemental figure in the manuscript). 
+This is an ugly, hardcoded, redundant script to visualize the depth profiles of the MAT alignments for the 9 strains (plus a control for both MAT-1 ad MAT-2) with significant alignments to both idiomorphs (included as a supplemental figure in the manuscript). 
