@@ -20,3 +20,6 @@ This is an ugly, hardcoded, redundant script to visualize the depth profiles of 
 
 **Jellyfish.sh** <br> 
 Generates K-mer counts from raw whole genome data (I used forward reads only)  - note, these have to be unzipped first. 
+
+**Allele_frequency_ploidy_analysis.R**<br>
+A seocnd ugly, hardcoded R script to run ploidy analysis using allele frequency from VCF input.
