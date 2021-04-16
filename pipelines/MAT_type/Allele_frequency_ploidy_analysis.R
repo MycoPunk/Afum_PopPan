@@ -2,7 +2,7 @@
 ##Last updated 16.Apr.2021
 
 ##set wd
-setwd("~/Desktop/Project_Afum_pangenome/")
+setwd("")
 
 ##load libraries
 library('vcfR')
