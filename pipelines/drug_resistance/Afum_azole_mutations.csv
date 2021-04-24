@@ -1,0 +1,36 @@
+﻿gene,type,A_fum_gene_name,gene_product,Tandom_repeat,Tandom_repeat_sequence_MARDy,mutation_code1,mutation_code2,mutation_code2_start_only,DOI,source
+cyp51A,Itraconazole,Afu4g06890,14‐alpha sterol demethylase,TR34,GAATCACGCGGTCCGGATGTGTGCTGAGCCGAATGAATCACGCGGTCCGGATGTGTGCTGAGCCGAAT,L98H,Leu98His,Leu98,10.1128/AAC.01092-06,MARDy
+cyp51A,Voriconazole,Afu4g06890,14‐alpha sterol demethylase,TR46,TCTAGAATCACGCGGTCCGGATGTGTGCTGAGCCGAATGAAAGTTGTCTAGAATCACGCGGTCCGGATGTGTGCTGAGCCGAATGAAAGTTG,Y121F/T289A,Tyr121Phe|Thr289Ala,Tyr121|Thr289,10.1093/jac/dkt397,MARDy
+cyp51A,"Itraconazole, Voriconazole, Posaconazole",Afu4g06890,14‐alpha sterol demethylase,TR46(x3),TCTAGAATCACGCGGTCCGGATGTGTGCTGAGCCGAATGAAAGTTGTCTAGAATCACGCGGTCCGGATGTGTGCTGAGCCGAATGAAAGTTGTCTAGAATCACGCGGTCCGGATGTGTGCTGAGCCGAATGAAAGTTG,Y121F/M172I/T289A/G448S,Tyr121Phe|Met172Ile|Thr289Ala|Gly448Ser,Tyr121|Met172|Thr289|Gly448,10.1128/mBio.00791-17,MARDy
+cyp51A,"Itraconazole, Voriconazole, Posaconazole",Afu4g06890,14‐alpha sterol demethylase,,,G54[E/V/R/W] ,Gly54Glu|Gly54Val|Gly54Arg|Gly54Trp,Gly54,10.1128/AAC.47.3.1120-1124.2003; 10.1128/JCM.43.1.214-222.2005 ,MARDy
+cyp51A,Itraconazole,Afu4g06890,14‐alpha sterol demethylase,,,G54E/I266N ,Gly54Glu|Ile266Asn,Gly54|Ile266,10.1128/AAC.05394-11,MARDy
+cyp51A,"Itraconazole, Voriconazole, Posaconazole, Caspofungin",Afu4g06890,14‐alpha sterol demethylase,,,G138[S/C/R],Gly138Ser|Gly138Cys|Gly138Arg,Gly138,10.1128/AAC.00517-11 ; 10.1002/ps.4301; 10.1128/AAC.48.2.568-574.2004,MARDy
+cyp51A,Itraconazole,Afu4g06890,14‐alpha sterol demethylase,,,F219S ,Phe219Ser,Phe219,10.1002/ps.4301,MARDy
+cyp51A,"Itraconazole, Voriconazole",Afu4g06890,14‐alpha sterol demethylase,,,H147Y ,His147Tyr,His147,10.3201/eid1507.090043,MARDy
+cyp51A,"Itraconazole, Posaconazole, variable Voriconazole resistance",Afu4g06890,14‐alpha sterol demethylase,,,M220[V/K/T],Met220Val|Met220Lys|Met220Thr,Met220,10.1128/AAC.48.7.2747-2750.2004,MARDy
+cyp51A,Voriconazole,Afu4g06890,14‐alpha sterol demethylase,,,G448S,Gly448Ser,Gly448,10.1128/JCM.00329-12,MARDy
+cyp51A,"Itraconazole, Voriconazole, Posaconazole",Afu4g06890,14‐alpha sterol demethylase,,,Y431C,Tyr431Cys,Try431,10.3201/eid1507.090043,MARDy
+cyp51A,"Itraconazole, Voriconazole, Posaconazole",Afu4g06890,14‐alpha sterol demethylase,,,G343C,Gly434Cys,Gly434,10.3201/eid1507.090043,MARDy
+cyp51A,"Itraconazole, Posaconazole",Afu4g06890,14‐alpha sterol demethylase,,,P216L,Pro216Leu,Pro116,10.3201/eid1507.090043,MARDy
+cyp51A,"Itraconazole, Posaconazole",Afu4g06890,14‐alpha sterol demethylase,,,F46Y/M172V/N248T/D255E ,Phe46Tyr|Met172Val|Asn246Thr|Asp255Glu|Glu427Lys,Phe46|Met172|Asn246|Asp255|Glu427,10.3201/eid1507.090043,MARDy
+cyp51A,Itraconazole,Afu4g06890,14‐alpha sterol demethylase,,,M236[K/T/V],Met236Lys|Met236Thr|Met236Val,Met236,10.1128/AAC.47.3.1120-1124.2003,lit review
+cyp51A,Itraconazole,Afu4g06890,14‐alpha sterol demethylase,,,G432S,Gly432Ser,Gly432,10.1093/jac/dkq450,lit review
+cyp51A,Itraconazole,Afu4g06890,14‐alpha sterol demethylase,,,N248K/V436A,Asn248Lys|Val436Ala,Asn248|Val436,10.3389/fmicb.2019.03127,lit review
+cyp51A,Itraconazole,Afu4g06890,14‐alpha sterol demethylase,,,Y433N,Tyr433Asn,Tyr433,10.3389/fmicb.2019.03127,lit review
+cyp51B,Pan Triazole,Afu7g03740,14‐alpha sterol demethylase - putative,,,G457S,Gly457Ser,Gly457,10.3390/jof6040315,lit review
+hapE,Itraconazole,Afu2g14720,sequence‐specific CCAAT DNA‐binding transcription factor,,,P88L,Pro88Leu,Pro88,10.1371/journal.pone.0050034,MARDy
+hmg1,Pan Triazole,Afu2g03700,hydroxymethylglutaryl‐CoA (HMG‐CoA) reductase,,,S269F,Ser269Phe,Ser269,0.3201/eid2410.180730,lit review
+hmg1,Pan Triazole,Afu2g03700,hydroxymethylglutaryl‐CoA (HMG‐CoA) reductase,,,F262 deletion,Phe262del,Phe262,10.1128/mBio.00437-19,lit review
+hmg1,Pan Triazole,Afu2g03700,hydroxymethylglutaryl‐CoA (HMG‐CoA) reductase,,,S305P,Ser305Pro,Ser305,10.1128/mBio.00437-19,lit review
+hmg1,Pan Triazole,Afu2g03700,hydroxymethylglutaryl‐CoA (HMG‐CoA) reductase,,,I412S,Ile412Ser,Ile412,10.1128/mBio.00437-19,lit review
+hmg1,Pan Triazole,Afu2g03700,hydroxymethylglutaryl‐CoA (HMG‐CoA) reductase,,,F390L,Phe390Leu,Phe390,10.3390/jof6040315,lit review
+AFUA_7G01960,Itraconazole,Afu7g01960,uncharacterised,,,167del,167del,167del,10.1016/j.fgb.2019.05.005,lit review
+cdr1B/abcC,Itraconazole,Afu1g14330,ABC transporter - putative,,,Overexpression,NA,NA,10.1093/jac/dkt075,lit review
+atrF,Itraconazole,Afu6g04360,ABC transporter - putative,,,Overexpression,NA,NA,10.1016/s1087-1845(02)00016-6,lit review
+mdr1,Itraconazole,Afu5g06070,ABC multidrug transporter,,,Overexpression,NA,NA,10.1093/jac/dkt075; 10.1128/aac.47.5.1719-1726.2003,lit review
+mdr2,Itraconazole,Afu4g10000,ABC multidrug transporter,,,Overexpression,NA,NA,10.1093/jac/dkt075; 10.1128/aac.47.5.1719-1726.2003,lit review
+Mdr3,Itraconazole,Afu3g03500,multidrug resistance protein - putative,,,Overexpression,NA,NA,10.1128/aac.47.5.1719-1726.2003,lit review
+Mdr4,Itraconazole,Afu1g12690,ABC multidrug transporter,,,Overexpression,NA,NA,10.1128/aac.47.5.1719-1726.2003,lit review
+cyp51A,"Itraconazole, Voriconazole",Afu4g06890,14‐alpha sterol demethylase,TR53,GAATCACGCGGTCCGATGTGTGCTGAGCCGAATGAAAGTTGTCTAATGTCTAGAATCACGCGGTCCGATGTGTGCTGAGCCGAATGAAAGTTGTCTAATGTCTA,Overexpression,NA,NA,10.1128/AAC.01083-17,MARDy
+cox10,Itraconazole,Afu4g08340,unknown calcium-dependent protein coding gene ,,,R243Q ,Arg243Gln,Arg243,10.1128/AAC.02101-16,MARDy
+fks1,Micafungin,Afu6g12400,"Putative 1,3-beta-glucan synthase catalytic subunit, major subunit of glucan synthase",,,F641S ,Phe641Ser,Phe641,10.1128/AAC.01277-17,MARDy
