@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-#SBATCH -p batch -N 1 -n 32 --mem 128gb  --out logs/optimized_262_strains.log -J PIRATE
+#SBATCH -p batch -N 1 -n 32 --mem 128gb  --out logs/optimized_261_strains.log -J PIRATE
 
 module unload miniconda3
 module unload miniconda2
@@ -23,5 +23,5 @@ source activate /bigdata/stajichlab/jstajich/.conda/envs/pirate
 
 #~/projects/PIRATE/bin/PIRATE -f "mRNA" -i gff \
 /bigdata/stajichlab/jstajich/projects/PIRATE/bin/PIRATE -f "mRNA" -i gff \
-    -t $CPUS --rplots -o 262_strains --nucl \
+    -t $CPUS --rplots -o 261_strains --nucl \
     -s "85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100" -k "--cd-low 100 -e 1E-9 --hsp-prop 0.5" -a -r
