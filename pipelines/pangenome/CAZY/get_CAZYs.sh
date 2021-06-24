@@ -1,6 +1,9 @@
 #!/usr/bin/bash
 #SBATCH --mem 10G --ntasks 20 --nodes 1  --time 2:00:00 
 
+#This script grabs the CAZY annotations from their respective annotation folders, renames them (tacking on the genome name), and subsets the set to just the genomes used the the Pangenome analysis (the ones that passed QC). 
+
+
 cd /bigdata/stajichlab/shared/projects/Afumigatus_pangenome/annotate
 
 #make a copy and name each file with the folder two above (genome name)
