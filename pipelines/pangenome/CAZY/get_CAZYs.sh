@@ -47,6 +47,16 @@ while read file; do
 	cp "$file" CAZY_261/; 
 done < genome_list.txt
 
+cd CAZY_261
 #check that you're not missing any
 ls | wc -l
 #261 #nice. 
+
+#add a col with the new file name
+for f in *.txt
+do
+ sed -i 's/$/ '"\t$f"'/' "$f"
+done
+
+#remove the extension from the new col
+sed -i 's/.CAZY.txt//g' *
