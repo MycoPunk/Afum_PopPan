@@ -1,4 +1,4 @@
-#this scrip looks at the abundance of CAZYs genes in the A.fumigatus pan genome. 
+#this scrip looks at the abundance of CAZy genes in the A.fumigatus pan genome. 
 
 #load modules
 library(phylosignal)
