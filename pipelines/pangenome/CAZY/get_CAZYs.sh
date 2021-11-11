@@ -20,7 +20,7 @@ done;
 #ok, so there are 315 CAZY sets, and we only want the ones in our pan genome. 
 #import strain list used in pirate. 
 cd ~/bigdata/Afum_pan_genome/CAZY
-cp /bigdata/stajichlab/shared/projects/Afumigatus_pangenome/Pangenome_analysis/PIRATE/261_strains/genome_list.txt .
+cp /bigdata/stajichlab/shared/projects/Afumigatus_pangenome/Pangenome_analysis/PIRATE/260_strains/genome_list.txt .
 
 #clean up the file names so they match 
 sed -i 's/Afum_//g' genome_list.txt
@@ -41,16 +41,17 @@ done
 
 
 #copy the matches into a new folder
-mkdir CAZY_261
+mkdir CAZY_260
 
 while read file; do 
-	cp "$file" CAZY_261/; 
+	cp "$file" CAZY_260
+	/; 
 done < genome_list.txt
 
-cd CAZY_261
+cd CAZY_260
 #check that you're not missing any
 ls | wc -l
-#261 #nice. 
+#260 #nice. 
 
 #add a col with the new file name
 for f in *.txt
