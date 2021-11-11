@@ -18,11 +18,11 @@ require(data.table)
 library(FSA)
 library(rcompanion)
 
-library(dplyr) #note- this version causes a onflict error with ggtree., down grade to v1.0.5. 
+library(dplyr) #note- this version causes a conflict error with ggtree., down grade to v1.0.5. 
 packageVersion("dplyr") #‘1.0.7’
 #remove.packages("dplyr")
 #devtools::install_github("hadley/dplyr@v1.0.5")
-remotes::install_github("YuLab-SMU/ggtree")
+#remotes::install_github("YuLab-SMU/ggtree", force = TRUE)
 #remotes::install_github("YuLab-SMU/tidytree")
 library(ggtree)
 library(tidyverse)
@@ -36,10 +36,10 @@ library(resample)
 #set seed for reproducibility
 set.seed(666)
 
-setwd("~/Desktop/Project_Afum_pangenome/CAZY")
+setwd("/CAZY")
 
 #read in the files
-all_cazy_list<- list.files(path ="~/Desktop/Project_Afum_pangenome/CAZY", pattern = "*.CAZY.txt", full.names=T)
+all_cazy_list<- list.files(path ="~/CAZY", pattern = "*.CAZY.txt", full.names=T)
 all_cazy<-lapply(all_cazy_list, fread, sep = c("\t"), header = FALSE, colClasses = 'character', stringsAsFactors=FALSE)
 
 ##clean up the files to only relivent info 
@@ -58,7 +58,6 @@ all_cazy_clean<- lapply(all_cazy, function(x) x[!(names(x) %in% c("junk1", "junk
 #clean up
 rm(all_cazy)
 
-
 #bind all dfs together 
 big_df<-bind_rows(all_cazy_clean)
 
@@ -72,25 +71,26 @@ big_df_table<- data.frame(table(big_df))
 rm(all_cazy_clean)
 rm(big_df)
 
-#make sure you got them all - there should be 261
+#make sure you got them all - there should be 260
 length(unique(big_df_table$strain)) #good
-
+unique(big_df_table$strain)
 #how many cazy fams were identified?
 length(unique(big_df_table$CAZy))
 #basic stats 
 stats_df<-data.frame(totals_CAZy =rowsum(big_df_table$Freq, group = big_df_table$strain))
-mean(stats_df$totals_CAZy) #460.0881
-sd(stats_df$totals_CAZy) #7.664848
+mean(stats_df$totals_CAZy) #460.1038
+sd(stats_df$totals_CAZy) #7.675412
 min(stats_df$totals_CAZy) #422
 max(stats_df$totals_CAZy) #478
 
 
 ##split dfs by clade association 
 #read in clade associations
-name_map<-read.delim("~/Desktop/Project_Afum_pangenome/clade_map_K3_20Jan2021.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE)
+name_map<-read.delim("~/Desktop/Project_Afum_pangenome_2/clade_map_K3_20Jan2021.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE)
 
-#check that you got them all, and not names are messed up - there should be 261
+#check that you got them all, and not names are messed up - there should be 260
 setdiff(big_df_table$strain,name_map$name_Pan_genome) #good
+setdiff(name_map$name_Pan_genome, big_df_table$strain) #good
 
 clade_1_names<- name_map[name_map$clade == "1",]
 clade_2_names<- name_map[name_map$clade == "2",]
@@ -100,22 +100,24 @@ clade_1<- big_df_table[big_df_table$strain %in% clade_1_names$name_Pan_genome,]
 clade_2<- big_df_table[big_df_table$strain %in% clade_2_names$name_Pan_genome,]
 clade_3<- big_df_table[big_df_table$strain %in% clade_3_names$name_Pan_genome,]
 
-
 #read in tree
-tree_me <- read.tree("~/Desktop/Project_Afum_pangenome/pop_for_pan2_.SNP.fasttree.tre")
+tree_me <- read.tree("~/Desktop/Project_Afum_pangenome_2/Afum_260_iq_tree_newick.tre")
+
+
 #remove the reference from the tree:
 tree_me<- drop.tip(tree_me, "Af293-REF", trim.internal = TRUE, subtree = FALSE,
                    root.edge = 0, rooted = is.rooted(tree_me), collapse.singles = TRUE,
                    interactive = FALSE)
-#remove double entered AF100_12-9 strain
-tree_me<- drop.tip(tree_me, "AF100-12_9", trim.internal = TRUE, subtree = FALSE,
-                   root.edge = 0, rooted = is.rooted(tree_me), collapse.singles = TRUE,
-                   interactive = FALSE)
+
 
 #match tree (for the couple sp. that are miss-named)
 tree_me$tip.label[tree_me$tip.label=="F18149"] <- "F18149-JCVI"
 tree_me$tip.label[tree_me$tip.label=="Afu_343-P/11"] <- "Afu_343-P-11"
 tree_me$tip.label[tree_me$tip.label=="AFIS1435CDC_6"] <- "AFIS1435_CDC_6"
+
+#root tree based on small outgroup tree (at node 266)
+tree_me<- root(tree_me, node = 266, resolve.root = FALSE,
+               interactive = FALSE, edgelabel = FALSE)
 
 #split by clade
 grA_me<- split(name_map$name_pop_genome, name_map$clade)
@@ -160,15 +162,6 @@ tree_plot_me <-
 # plot and add the tip labels
 tree_plot_me + geom_tiplab(size = 1, align = TRUE, linesize = .1, linetype = 0)
 
-##flip nodes 
-#which nodes?
-#plot(tree_grA_me, use.edge.length=FALSE, cex = .2, label.offset = 10)
-#nodelabels(cex=.5)
-#looks like 387, 264 and 309, 295
-
-tree_to_map_on<- flip(tree_plot_me, 387, 264) %>% flip(309, 295) + geom_tiplab(size = 0, align = TRUE, linesize = .25, linetype = 3)
-tree_to_map_on
-
 #map the CAZYs to the tree
 #format data
 
@@ -181,7 +174,8 @@ rownames(merged_temp)<- merged_temp$name_pop_genome
 
 #drop cols you don't need
 #CAZYs_to_map_clean<- subset(merged_temp, select=-c(strain,name_pop_genome, clade))
-CAZYs_to_map_clean<- subset(merged_temp, select=-c(strain,name_pop_genome))
+CAZYs_to_map_clean<- subset(merged_temp, select=-c(strain,name_pop_genome, OF_name, MAT_type))
+
 
 #### tree to plot on
 tree_plot_me <- 
@@ -200,13 +194,16 @@ tree_plot_me <-
   guides(color = guide_legend(override.aes = list(size = 4)))
 
 #map and rotate the nodes to be in order of the clades 
-tree_to_map_on<- flip(tree_plot_me, 387, 264) %>% flip(309, 295) + geom_tiplab(size = 0, align = TRUE, linesize = .25, linetype = 3)
-tree_to_map_on
+#tree_to_map_on<- flip(tree_plot_me, 387, 264) %>% flip(309, 295) + geom_tiplab(size = 0, align = TRUE, linesize = .25, linetype = 3)
+#tree_to_map_on
 ####
+#asthetics
+tree_plot_me<- tree_plot_me +geom_tiplab(size = 0, align = TRUE, linesize = .25, linetype = 3)
+tree_plot_me
 
 
 #plot
-CAZY_tree_plot <-  gheatmap(tree_to_map_on, 
+CAZY_tree_plot <-  gheatmap(tree_plot_me, 
                             CAZYs_to_map_clean[1:(length(CAZYs_to_map_clean)-1)],
                             low = "white",
                             high = "black",
@@ -227,6 +224,7 @@ p
 #remove cols with zero variance 
 colVars(CAZYs_to_map_clean)
 
+
 #which cols have 0 variance?
 which(apply(CAZYs_to_map_clean, 2, var) == 0)
 
@@ -243,9 +241,10 @@ x <- "clade"
 CAZYs_to_map_clean_no_zero<- CAZYs_to_map_clean_no_zero[c(x, setdiff(names(CAZYs_to_map_clean_no_zero), x))]
 
 levene_results<- lapply(subset(CAZYs_to_map_clean_no_zero, select = -clade), leveneTest, group = as.factor(CAZYs_to_map_clean_no_zero$clade))
+#extract p-vals
 extract1<- lapply(levene_results, `[[`, c("Pr(>F)")) 
-extract2<- data.frame(sapply(extract1, "[[", 1) > 0.05)
-
+#pval- less than 0.05? if so, reject= variance is not equal. 
+extract2<- data.frame(sapply(extract1, "[[", 1) < 0.05)
 table(extract2) #26 are less than 0.05, so not all categories have equal variance. = need to use non parametric test.
 
 
@@ -268,6 +267,11 @@ all_kw_p_vals$p.adjust<- p.adjust(all_kw_p_vals$p.val, method = "bonferroni",
 
 p_vals_kw_sig<- all_kw_p_vals[all_kw_p_vals$p.adjust < 0.001,]
 
+
+######
+names_of_sig_results<- rownames(p_vals_kw_sig)
+
+
 ######
 
 ##conduct posthoc tests. 
@@ -280,6 +284,9 @@ DT_loop_vals<- apply(df.subset_and_clade[,-1], 2, function(x) dunnTest(x,df.subs
 length(DT_loop_vals)
 
 ### Compact letter display loop
+#instantiate empty data frame
+CAZy_table<- data.frame(matrix(NA, nrow = 3, ncol = 0))
+                        
 for (i in seq_along(DT_loop_vals)){
   
   name <- (names(DT_loop_vals)[i])
@@ -290,6 +297,7 @@ for (i in seq_along(DT_loop_vals)){
   row_to_add<-x$Letter
   CAZy_table[[name]] <- row_to_add
 }
+CAZy_table
 
 
 #######
@@ -324,13 +332,13 @@ rownames(table_for_print)<- c("Clade 1", "Clade 2", "Clade 3")
 names_of_sig_results<- rownames(p_vals_kw_sig)
 #subset from the main df
 #sig_df<- CAZYs_to_map_clean_no_zero[names(CAZYs_to_map_clean_no_zero) %in% names_of_sig_results,]
-#df.subset <- CAZYs_to_map_clean_no_zero[, names_of_sig_results]
+df.subset <- CAZYs_to_map_clean_no_zero[, names_of_sig_results]
 
 #Scale
 test<- apply(df.subset, MARGIN = 2, FUN = function(X) (X - min(X))/diff(range(X)))
 
 #map these onto tree. 
-CAZY_tree_plot <-  gheatmap(tree_to_map_on, 
+CAZY_tree_plot <-  gheatmap(tree_plot_me, 
                             test,
                             #low = "white",
                             #high = "black",
@@ -346,7 +354,7 @@ CAZY_tree_plot <-  gheatmap(tree_to_map_on,
 scale_fill_viridis_c(option="F", name="normalized\nabundance") 
 p<- CAZY_tree_plot + geom_tiplab(size = .8, align = TRUE, linesize = .25, offset = 2.75, linetype = 0)
 p
-
+ggsave(file="CAZY_tree.pdf",device="pdf", p, width=8, height=8, units="in")
 
 
 for_print<- data.frame(names_of_sig_results)
@@ -357,4 +365,3 @@ for_print<- data.frame(names_of_sig_results)
 good_names <- name_map$name_pop_genome[match(CAZYs_to_map_wide$strain, name_map$name_Pan_genome)]
 CAZYs_to_map_wide_fixed<- cbind(good_names, CAZYs_to_map_wide)
 #write.table(CAZYs_to_map_wide_fixed, "Afum_Table_S4.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
-
