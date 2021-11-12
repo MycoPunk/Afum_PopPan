@@ -1,5 +1,5 @@
 #A fum pan genome analysis, first pass data investigation of Ortho Finder results
-#last updated: 5.Nov.2021
+#last updated: 12.Nov.2021
 
 #set packages 
 library(data.table)
