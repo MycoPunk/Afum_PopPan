@@ -1,4 +1,4 @@
-#A fum pan genome analysis, first pass data investigation of Ortho Finder results
+#A fum pan genome analysis, using proteins clustered by Ortho Finder results
 #last updated: 12.Nov.2021
 
 #set packages 
