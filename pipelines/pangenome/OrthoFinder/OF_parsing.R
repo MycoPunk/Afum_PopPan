@@ -19,7 +19,9 @@ library(vegan)
 packageVersion("vegan") 
 
 
-setwd("~")
+setwd("~/Desktop/Project_Afum_pangenome_2/")
+#with the double entered Af100-12_9 removed
+#PIRATE.gene_families<-as.data.frame(fread("PIRATE.gene_families.ordered_27Sep2021.tsv")) 
 OF.gene_counts<-as.data.frame(fread("Orthogroups.GeneCount.tsv")) 
 OF.gene_families<-as.data.frame(fread("Orthogroups.tsv")) 
 OF.unassigned<- as.data.frame(fread("Orthogroups_UnassignedGenes.tsv")) #this is where your singletons live
@@ -32,8 +34,7 @@ OF.gene_families_all<- rbind(OF.gene_families, OF.unassigned)
 n_gene_fams<- nrow(OF.gene_families_all)
 n_gene_fams
 #15,309 (vs. 15,476 w. PIRATE)
-View(OF.unassigned)
-View(OF.gene_families)
+
 
 #fix names
 names(OF.gene_families_all)<- sapply(names(OF.gene_families_all), gsub, pattern = "Aspergillus_fumigatus_", replacement = "" )
@@ -638,7 +639,7 @@ clade2_names<- accessory_by_strain_list[accessory_by_strain_list == "2"]
 clade2<- cbind(OF_gene_fam = all_accessory_anno_no_sing[,1], all_accessory_anno_no_sing[,colnames(all_accessory_anno_no_sing) %in% names(clade2_names)])
 
 clade3_names<- accessory_by_strain_list[accessory_by_strain_list == "3"]
-clade3<- cbind(all_accessory_anno_no_sing[,1], all_accessory_anno_no_sing[,colnames(all_accessory_anno_no_sing) %in% names(clade3_names)])
+clade3<- cbind(OF_gene_fam = all_accessory_anno_no_sing[,1], all_accessory_anno_no_sing[,colnames(all_accessory_anno_no_sing) %in% names(clade3_names)])
 
 dim(clade1)
 dim(clade2)
@@ -758,9 +759,9 @@ p
 
 #Print all exclusive gene fams
 #print these to pull out these gene fams for annotation in bash
-#write.table(exclusive_to_clade1, "exclusive_to_clade1_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
-#write.table(exclusive_to_clade2, "exclusive_to_clade2_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
-#write.table(exclusive_to_clade3, "exclusive_to_clade3_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+write.table(exclusive_to_clade1, "exclusive_to_clade1_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+write.table(exclusive_to_clade2, "exclusive_to_clade2_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+write.table(exclusive_to_clade3, "exclusive_to_clade3_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
 
 ##do the same for losses
@@ -1028,3 +1029,4 @@ total_MAT2
 #ratio
 all_mat_ratio<- reduce.fraction(c(total_MAT1, total_MAT2))
 all_mat_ratio #can't be reduced 
+
