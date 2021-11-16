@@ -22,15 +22,15 @@ done
 
 #subset the strains using the randomly sampled strain name lists created above, from the vcf files 
 for N in {1..50}; do \
-vcftools --keep temp/C1_sample_temp${N}.txt --gzvcf vcf/262_strains.selected.SNP.NO_TEs.vcf.gz --recode --out temp/Clade_1_samp_${N}
+vcftools --keep temp/C1_sample_temp${N}.txt --gzvcf vcf/Pop_for_pan_260.All.SNP.combined_selected.NO.TE.vcf.gz --recode --out temp/Clade_1_samp_${N}
 done
 
 for N in {1..50}; do \
-vcftools --keep temp/C2_sample_temp${N}.txt --gzvcf vcf/262_strains.selected.SNP.NO_TEs.vcf.gz --recode --out temp/Clade_2_samp_${N}
+vcftools --keep temp/C2_sample_temp${N}.txt --gzvcf vcf/Pop_for_pan_260.All.SNP.combined_selected.NO.TE.vcf.gz --recode --out temp/Clade_2_samp_${N}
 done
 
 for N in {1..50}; do \
-vcftools --keep temp/C3_sample_temp${N}.txt --gzvcf vcf/262_strains.selected.SNP.NO_TEs.vcf.gz --recode --out temp/Clade_3_samp_${N}
+vcftools --keep temp/C3_sample_temp${N}.txt --gzvcf vcf/Pop_for_pan_260.All.SNP.combined_selected.NO.TE.vcf.gz --recode --out temp/Clade_3_samp_${N}
 done
 
 #remove invariant sites using bcftools
