@@ -1,6 +1,6 @@
 #!/usr/bin/bash -l
 #SBATCH -p short -N 1 -n 1 --mem 4gb
-cd /bigdata/stajichlab/shared/projects/Afumigatus_pangenome/Pangenome_analysis/PIRATE/261_strains
+cd /bigdata/stajichlab/shared/projects/Afumigatus_pangenome/Pangenome_analysis/PIRATE/260_strains
 
 #this grabs the family names
 gene_fams=$(grep '^>' representative_sequences.faa | sed -e 's/;.*//' | sed 's/>//1')
