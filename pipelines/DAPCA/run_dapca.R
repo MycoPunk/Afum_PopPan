@@ -2,8 +2,9 @@
 #using DAPC in the the adegnet package
 
 #set wd
-setwd("~/Desktop/Project_Afum_pangenome/")
+#setwd("~")
 
+#load libraries
 library("poppr")
 library("ape") # To visualize the tree using the "nj" function
 library("magrittr")
@@ -16,13 +17,13 @@ library('parallel')
 set.seed(666)
 
 #read in vcf
-vcf_me<- read.vcfR("262_strains.selected.SNP.NO_TEs.vcf.gz") #W/o TE's and w 262 strains
+vcf_me<- read.vcfR("Pop_for_pan_260.All.SNP.combined_selected.vcf.gz") #W/o TE's and w 260 strains
 
 #convert vcf to genlight object
 gl_Afum <- vcfR2genlight(vcf_me)
 rm(vcf_me)
 
-#run find clusters -note this takes about 90 minutes at 61,205 SNPS
+#run find clusters -note this takes about 90 minutes
 grp1<-find.clusters(gl_Afum, max.n.clust=15) #note n-clusters needs to be less than the n of individuals
 #Choose the number PCs to retain (>=1): 
 #  200 #for the selection of K, there is no benefit to reducing the number of PCs
@@ -47,7 +48,6 @@ dapc2 <- dapc(gl_Afum, grp1$grp, n.da=100, n.pca=3)
 myCol <- c(clade3 = "#ABA778",
            clade2 ="#ED7F6F",
            clade1 = "#56326E")
-#clade4 = "#F7C165")
 
 #scales::show_col(myCol); myCol
 
@@ -73,7 +73,7 @@ scatter(dapc2,1,1, col=myCol, bg="white",
 summary(dapc2)
 #how many strains / groups?
 dim(dapc2$posterior)
-##  262   3
+##  260   3
 #assignplot(dapc2, subset=1:150,cex.lab=.10,pch=1)
 #round(head(dapc2$posterior),3)
 
@@ -81,22 +81,8 @@ dim(dapc2$posterior)
 groups<- data.frame(clade = dapc2$grp)
 
 #look for the most admixed individuals
-admixed <- which(apply(dapc2$posterior,1, function(e) all(e<.80))) #those having no more than 0.75 probability of membership to any group
-length(admixed)
-
-#there are no individuals likely to be admixed between the three populations
-
-#there are 9 admixed at K=4
-#AF100-12_10,
-#AF100-12_18,
-#AF100-12_2W,
-#AF100-12_35,
-#AFUG_031815-1869, 
-#AFUG_082015-1200,
-#B5259_CDC-23,
-#SF1S6,
-#SF2S6 
-
+admixed <- which(apply(dapc2$posterior,1, function(e) all(e<.80))) #those having no more than 0.80 probability of membership to any group
+length(admixed) #there are no individuals likely to be admixed between the three populations
 
 ##print clade assignments
 write.table(groups, "DAPC_groupings_K3_20Jan2021.txt", sep="\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
