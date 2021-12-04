@@ -1,5 +1,5 @@
-##This is a test to look at the distribution of known resistance variants in the pop-genome data for 262 strains of A.fumigatus
-#last updated 17.Apr.2021
+##This is a test to look at the distribution of known resistance variants in the pop-genome data for 260 strains of A.fumigatus
+#last updated 5.Nov.2021
 
 #load modules
 require(data.table)
@@ -16,7 +16,7 @@ library(ggplot2)
 library(stringr)
 
 #set wd
-setwd("")
+setwd("~/Desktop/Project_Afum_pangenome_2/")
 options(stringsAsFactors = FALSE)
 
 #sessionInfo() 
@@ -25,17 +25,26 @@ options(stringsAsFactors = FALSE)
 set.seed(666)
 
 ##read in data
-snpEff_all<-read.delim("pop_for_pan2_.snpEff.matrix.tab", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = FALSE)
+snpEff_all<-read.delim("Pop_for_pan_260.snpEff.matrix.tsv", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = FALSE)
 Afum_grp<-read.delim("grp_temp.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE)
 resistance_db<-read.delim("Afum_azole_mutations.csv", header = TRUE, sep = ",", fill = TRUE, strip.white = TRUE)
-tree<- read.tree("pop_for_pan2_.SNP.fasttree.tre")
+
+#UPDATE TREE AND FIX MAPPING/ROOTING
+tree <- read.tree("Afum_260_iq_tree_newick.tre")
 #remove the reference from the tree:
-tree<- drop.tip(tree_me, "Af293-REF", trim.internal = TRUE, subtree = FALSE,
-                   root.edge = 0, rooted = is.rooted(tree_me), collapse.singles = TRUE,
+tree<- drop.tip(tree, "Af293-REF", trim.internal = TRUE, subtree = FALSE,
+                   root.edge = 0, rooted = is.rooted(tree), collapse.singles = TRUE,
                    interactive = FALSE)
+#match tree (for the couple sp. that are  miss-named)
+tree$tip.label[tree$tip.label=="F18149"] <- "F18149-JCVI"
+tree$tip.label[tree$tip.label=="Afu_343-P/11"] <- "Afu_343-P-11"
+tree$tip.label[tree$tip.label=="AFIS1435CDC_6"] <- "AFIS1435_CDC_6"
+#root tree based on small outgroup tree (at node 266)
+tree<- root(tree, node = 266, resolve.root = FALSE,
+               interactive = FALSE, edgelabel = FALSE)
 
 
-###clean the data for easy processing###
+###clean the SNP data for easy processing###
 #remove the brackets form ALT
 snpEff_all$ALT<-gsub("\\[|\\]", "", snpEff_all$ALT)
 
@@ -44,12 +53,12 @@ snpEff_all[] <- lapply(snpEff_all, gsub, pattern='/', replacement="")
 
 #get set size
 dim(snpEff_all[,11:(ncol(snpEff_all) -1)])
-#262 strains
+#260 strains
 
 #subset to only missense variants 
 snpEff_no_intergenic<- snpEff_all[snpEff_all$TYPE == "missense_variant",]
 dim(snpEff_no_intergenic)
-#12883 positions with missence variants
+#12926 positions with missence variants
 
 ###sep each gene of interest in the resistance_db, sep snpEff_no_intergenic into their own dfs
 #set genes of interest
@@ -165,6 +174,8 @@ make_by_variant_output <- function(input){
 by_variant_output_df<- make_by_variant_output(input = Cyp51a)
 colSums(by_variant_output_df)
 
+Cyp51a
+
 #Gly448Ser Met220Val Pro216Leu His147Tyr Gly138Cys  Leu98His  Gly54Glu 
 #1         1         4         1         7        19         2 
 
@@ -247,12 +258,6 @@ row.names(by_variant_output_df_binary_presence_absence_unknowns)<- row.names(by_
 #setdiff(tree_node_names, df_names)
 #none missing
 
-##plot tree 
-#figure out which nodes to flip
-#plot(tree_grA_me, use.edge.length=FALSE)
-#nodelabels()
-#263 or 264 I think
-
 
 #plot tree
 tree_plot_me <- 
@@ -270,19 +275,18 @@ tree_plot_me <-
         legend.text=element_text(size=7))+
   guides(color = guide_legend(override.aes = list(size = 4)))
 
-#map and rotate the nodes to be in order of the clades 
-tree_to_map_on<- flip(tree_plot_me, 388, 265) %>% flip(296, 310) + geom_tiplab(size = 0, align = TRUE, linesize = .25, linetype = 3)
-tree_to_map_on
-
+#asthetics
+tree_plot_me<- tree_plot_me +geom_tiplab(size = 0, align = TRUE, linesize = .25, linetype = 3)
+tree_plot_me
 
 ncol(by_variant_output_df_binary_presence_absence)
 #plot resistance variants onto tree
 #plot
 #bind and highlight - can't get width right when adjacent. 
 all_vars<- cbind(by_variant_output_df_binary_presence_absence, by_variant_output_df_binary_presence_absence_unknowns)
-cyp51A_tree_plot <-  gheatmap(tree_to_map_on, 
-                              by_variant_output_df_binary_presence_absence_unknowns,
-                              #all_vars,
+cyp51A_tree_plot <-  gheatmap(tree_plot_me, 
+                              #by_variant_output_df_binary_presence_absence_unknowns,
+                              all_vars,
                               offset=0.02, width=0.7, low="white", high="black", 
                               colnames = T, 
                               colnames_angle = 45,
@@ -300,12 +304,9 @@ p
 #ggsave(file="Cyp51A_variants.pdf",device="pdf", p, width=8, height=8, units="in")
 
 
-
 #make supplemental figure of all missence variants from all strains (includng those for which only expression data is availble)
 #remove cyp51a results
-View(resistance_db_GOI)
 genes_w_vars
-
 
 
 #isolate the four other genes with non-syn changes in resistance genes:
@@ -332,7 +333,6 @@ AFUA_7G01960_all_PA<- make_by_variant_output(input = AFUA_7G01960_all)
 colSums(AFUA_7G01960_all_PA)
 
 
-
 #format resistance allele data for graphing
 #colapse df of df because you're an idiot and didn't append these as a list in the first place
 cox10_colapse<- bind_rows(lapply(cox10_all_PA,function(i)do.call(cbind,i)))
@@ -346,6 +346,8 @@ row.names(cyp51B_colapse)<- row.names(cyp51B_all_PA[[1]])
 
 AFUA_7G01960_colapse<- bind_rows(lapply(AFUA_7G01960_all_PA,function(i)do.call(cbind,i)))
 row.names(AFUA_7G01960_colapse)<- row.names(AFUA_7G01960_all_PA[[1]])
+
+
 
 #order columns by abundance
 cox10_by_abundance<- cox10_colapse[,order(colSums(-cox10_colapse))]
@@ -374,7 +376,7 @@ row.names(AFUA_7G01960_by_abundance_presence_absence)<- row.names(AFUA_7G01960_c
 
 #bind and highlight - can't get width right when adjacent. 
 #all_vars<- cbind(by_variant_output_df_binary_presence_absence, by_variant_output_df_binary_presence_absence_unknowns)
-cox10_tree_plot <-  gheatmap(tree_to_map_on, 
+cox10_tree_plot <-  gheatmap(tree_plot_me, 
                               cox10_by_abundance_presence_absence,
                               offset=0, width=0.8, low="white", high="black", 
                               colnames = T, 
@@ -392,7 +394,7 @@ cox10_tree
 names(cox10_by_abundance_presence_absence)
 ncol(cox10_by_abundance_presence_absence)
 
-mdr2_tree_plot <-  gheatmap(tree_to_map_on, 
+mdr2_tree_plot <-  gheatmap(tree_plot_me, 
                             mdr2_by_abundance_presence_absence,
                              offset=0, width=0.8, low="white", high="black", 
                              colnames = T, 
@@ -412,7 +414,7 @@ ncol(mdr2_by_abundance_presence_absence)
 
 
 
-Cyp51B_tree_plot <-  gheatmap(tree_to_map_on, 
+Cyp51B_tree_plot <-  gheatmap(tree_plot_me, 
                             cyp51B_by_abundance_presence_absence,
                             offset=0, width=0.8, low="white", high="black", 
                             colnames = T, 
@@ -432,7 +434,7 @@ ncol(cyp51B_by_abundance_presence_absence)
 
 
 
-AFUA_7G01960_tree_plot <-  gheatmap(tree_to_map_on, 
+AFUA_7G01960_tree_plot <-  gheatmap(tree_plot_me, 
                               AFUA_7G01960_by_abundance_presence_absence,
                               offset=0, width=0.8, low="white", high="black", 
                               colnames = T, 
@@ -456,7 +458,7 @@ all_all_vars<- cbind(cox10_by_abundance_presence_absence,
                      cyp51B_by_abundance_presence_absence,
                      AFUA_7G01960_by_abundance_presence_absence)
 
-all_tree_plot <-  gheatmap(tree_to_map_on, 
+all_tree_plot <-  gheatmap(tree_plot_me, 
                            all_all_vars,
                                     offset=0, width=1, low="white", high="black", 
                                     colnames = T, 
@@ -472,4 +474,4 @@ all_tree_plot <-  gheatmap(tree_to_map_on,
 all_tree<- all_tree_plot + geom_tiplab(size = .8, align = TRUE, linesize = .25, offset = 1.4, linetype = 0)
 all_tree
 #export
-ggsave(file="non_Cyp51A_variants.pdf",device="pdf", all_tree, width=8, height=8, units="in")
+#ggsave(file="non_Cyp51A_variants.pdf",device="pdf", all_tree, width=8, height=8, units="in")
