@@ -1,5 +1,5 @@
 #A fum pan genome analysis, using proteins clustered by Ortho Finder results
-#last updated: 12.Nov.2021
+#last updated: 3.Dec.2021
 
 #set packages 
 library(data.table)
@@ -18,10 +18,7 @@ library(phonTools)
 library(vegan)
 packageVersion("vegan") 
 
-
-setwd("~/Desktop/Project_Afum_pangenome_2/")
-#with the double entered Af100-12_9 removed
-#PIRATE.gene_families<-as.data.frame(fread("PIRATE.gene_families.ordered_27Sep2021.tsv")) 
+#setwd("")
 OF.gene_counts<-as.data.frame(fread("Orthogroups.GeneCount.tsv")) 
 OF.gene_families<-as.data.frame(fread("Orthogroups.tsv")) 
 OF.unassigned<- as.data.frame(fread("Orthogroups_UnassignedGenes.tsv")) #this is where your singletons live
@@ -34,7 +31,6 @@ OF.gene_families_all<- rbind(OF.gene_families, OF.unassigned)
 n_gene_fams<- nrow(OF.gene_families_all)
 n_gene_fams
 #15,309 (vs. 15,476 w. PIRATE)
-
 
 #fix names
 names(OF.gene_families_all)<- sapply(names(OF.gene_families_all), gsub, pattern = "Aspergillus_fumigatus_", replacement = "" )
@@ -223,7 +219,6 @@ accessory_by_strain[which.min(accessory_by_strain$totals),]
 accessory_by_strain<- accessory_by_strain[order(accessory_by_strain$totals),]
 #mean
 mean(accessory_by_strain$totals)
-
 
 #fix names so that they match 
 name_map<-read.delim("clade_map_K3_20Jan2021.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = TRUE)
@@ -589,7 +584,6 @@ tree_all_data
 #remove "DMC2" for graphing 
 tree_all_data_test<- tree_all_data 
 
-#tree_all_data_test$tip.label<- gsub(pattern = "DMC2_", replacement = "", tree_all_data_test$tip.label)
 tree_all_data_test$data$label<- gsub(pattern = "DMC2_", replacement = "", tree_all_data_test$data$label)
 
 tree_all_data_test
@@ -612,7 +606,8 @@ gene_fam_by_strain_w_anno_ones<- as.data.frame(replace(gene_fam_by_strain_w_anno
 #change to numeric
 gene_fam_by_strain_w_anno_ones_num <- mutate_all(gene_fam_by_strain_w_anno_ones, function(x) as.numeric(as.character(x)))
 #bind annotations
-gene_fam_by_strain_w_anno_ones_num2<- cbind(OF.gene_families = OF.gene_families_all$Orthogroup, gene_fam_by_strain_w_anno_ones_num)
+gene_fam_by_strain_w_anno_ones_num2<- cbind(OF.gene_families_all = OF.gene_families_all$Orthogroup, gene_fam_by_strain_w_anno_ones_num)
+
 
 
 #subset to remove core genes and singletons 
@@ -625,13 +620,9 @@ all_accessory_anno_no_sing<- all_accessory_anno[rowSums(all_accessory_anno[,2:nc
 dim(all_accessory_anno_no_sing)
 
 #split list of strain names by clade
-#accessory_by_strain_factor_list<- as.list(accessory_by_strain$strain, accessory_by_strain$clade)
 accessory_by_strain_list <- setNames(accessory_by_strain$clade, accessory_by_strain$strain)
-#accessory_by_strain_list_factor<- as.factor(accessory_by_strain_list)
 
 ##split the count data frame by the factor list
-
-
 clade1_names<- accessory_by_strain_list[accessory_by_strain_list == "1"]
 clade1<- cbind(OF_gene_fam = all_accessory_anno_no_sing[,1], all_accessory_anno_no_sing[,colnames(all_accessory_anno_no_sing) %in% names(clade1_names)])
 
@@ -641,20 +632,11 @@ clade2<- cbind(OF_gene_fam = all_accessory_anno_no_sing[,1], all_accessory_anno_
 clade3_names<- accessory_by_strain_list[accessory_by_strain_list == "3"]
 clade3<- cbind(OF_gene_fam = all_accessory_anno_no_sing[,1], all_accessory_anno_no_sing[,colnames(all_accessory_anno_no_sing) %in% names(clade3_names)])
 
-dim(clade1)
+dim(clade1) #note this is +1 in ea row as the OG is the first col
 dim(clade2)
 dim(clade3)
 
-
 #are there gene families that are exclusive to clade 1?
-#clade1_rowsums<- clade1[rowSums(clade1[,5:ncol(clade1)]) >0,]
-
-#calculate rowsums
-
-#QC make sure they match 
-#length(names(clade7)) -5 
-#length(clade7_names)  #yep
-
 clade1$totals<-  rowSums(clade1[,2:ncol(clade1)])
 clade2$totals<-  rowSums(clade2[,2:ncol(clade2)])
 clade3$totals<-  rowSums(clade3[,2:ncol(clade3)])
@@ -665,12 +647,13 @@ exclusive_to_clade1<- clade1[(clade1$totals > 0) &
                                (clade2$totals == 0) &
                                (clade3$totals == 0),]
 
-dim(exclusive_to_clade1) 
+nrow(exclusive_to_clade1)
 
 aveclade1<- nrow(exclusive_to_clade1) / length(clade1_names) #there are 1256 accessory gene fams exclusive to clade 1 (1062  using PIRATE)
 round(aveclade1) #ave is 6
 
 tail(sort(exclusive_to_clade1$totals)) # most abundant gene fam is present in in 142 of the 200 isolates in clade1
+
 
 length(clade1_names)*.90 
 #get all present in more than 90% of the isolates in that clade
@@ -690,7 +673,7 @@ round(aveclade2) #ave is 2
 length(clade2_names) #there are 45 isolates in clade 2
 tail(sort(exclusive_to_clade2$totals)) #most abundant appear in 42 of the of the 45 isolates (two gene fams)
 exclusive_to_clade2_of_note<- exclusive_to_clade2[exclusive_to_clade2$totals > length(clade2_names)*.90,]
-dim(exclusive_to_clade2_of_note) #0 clade defining gains in Clade 2
+dim(exclusive_to_clade2_of_note) #2 clade-defining gains in Clade 2: OG0010568 & OG0010571
 
 
 #exclusive to clade3
@@ -708,7 +691,6 @@ tail(sort(exclusive_to_clade3$totals))
 #there are 115 accessory gene fams exclusive to clade3, some in all 15 isolates
 exclusive_to_clade3_of_note<- exclusive_to_clade3[exclusive_to_clade3$totals > length(clade3_names)*.90,]
 dim(exclusive_to_clade3_of_note) #23 are present in more than > 90% of all isolates
-
 
 ##graph distribution of accesory genes by clade 
 #calculate percentage of genomes of all in clade that unique gene family is found in
@@ -740,28 +722,33 @@ p
 #ggsave("distribution_of_accessory_genes_by_clade.pdf", p, width=20, height=20, 
 #       device = "pdf", units = "cm")
 
-
-
-
-#GO BACK EHRE AND GET ANNOTATIONS FOR EA GENE FAM
-#annotations?
-#exclusive_to_clade1_above50$consensus_product #none
-#exclusive_to_clade2_above50$consensus_product #none
-#exclusive_to_clade3_above50$consensus_product #none
-
-#are these annotated in AF293?
-#exclusive_to_clade1_above50$Afum_AF293 #only one is present in AF293 #g005563
-
-#print these to pull out these gene fams for annotation in bash
-#write.table(exclusive_to_clade1_above50, "exclusive_to_clade1_above50.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
-#write.table(exclusive_to_clade2_above50, "exclusive_to_clade2_above50.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
-#write.table(exclusive_to_clade3_above50, "exclusive_to_clade3_above50.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
-
 #Print all exclusive gene fams
 #print these to pull out these gene fams for annotation in bash
 write.table(exclusive_to_clade1, "exclusive_to_clade1_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
 write.table(exclusive_to_clade2, "exclusive_to_clade2_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
 write.table(exclusive_to_clade3, "exclusive_to_clade3_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+
+
+
+##validate - OG exclusive to C2 and C3 should primarily NOT have Afu blast hits if they are real (because Af293 is in C1)
+#load data from OG to Afu BLAST search
+#OFtoAfu<- as.data.frame(fread("one_to_one_blast_hits.txt", header = FALSE)) #this is the OG to Afu designations
+OFtoAfu<- as.data.frame(fread("OF_blastP_results_filtered.txt", header = FALSE)) #this is the OG to Afu designations
+#assign col names
+fmt6_names<- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore")
+colnames(OFtoAfu)<- fmt6_names
+
+#look at the data first for parsing, probably need to subset by e-value
+hist(OFtoAfu$evalue, breaks = 1000) # yep, some high guys in there
+OFtoAfu_eval<- OFtoAfu[OFtoAfu$evalue < 1e-15,] #we loose 327 Afu to OGs that are untrustworthy
+dim(OFtoAfu_eval)
+hist(OFtoAfu_eval$evalue, breaks = 1000)
+
+#intersections between these two sets?
+intersect(exclusive_to_clade2$OF_gene_fam, OFtoAfu_eval$sseqid) #none
+length(exclusive_to_clade2$OF_gene_fam) #none out of 95
+intersect(exclusive_to_clade3$OF_gene_fam, OFtoAfu_eval$sseqid) #2 "OG0011685" "OG0013027"
+length(exclusive_to_clade3$OF_gene_fam) #two out of 115 in that set
 
 
 ##do the same for losses
@@ -1029,4 +1016,3 @@ total_MAT2
 #ratio
 all_mat_ratio<- reduce.fraction(c(total_MAT1, total_MAT2))
 all_mat_ratio #can't be reduced 
-
