@@ -1,5 +1,5 @@
 ##This is a test to look at the distribution of known resistance variants in the pop-genome data for 260 strains of A.fumigatus
-#last updated 5.Nov.2021
+#last updated 4.Dec.2021
 
 #load modules
 require(data.table)
@@ -26,10 +26,8 @@ set.seed(666)
 
 ##read in data
 snpEff_all<-read.delim("Pop_for_pan_260.snpEff.matrix.tsv", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = FALSE)
-Afum_grp<-read.delim("grp_temp.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE)
+Afum_grp<-read.delim("clade_map_K3_20Jan2021.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = TRUE)
 resistance_db<-read.delim("Afum_azole_mutations.csv", header = TRUE, sep = ",", fill = TRUE, strip.white = TRUE)
-
-#UPDATE TREE AND FIX MAPPING/ROOTING
 tree <- read.tree("Afum_260_iq_tree_newick.tre")
 #remove the reference from the tree:
 tree<- drop.tip(tree, "Af293-REF", trim.internal = TRUE, subtree = FALSE,
@@ -53,7 +51,7 @@ snpEff_all[] <- lapply(snpEff_all, gsub, pattern='/', replacement="")
 
 #get set size
 dim(snpEff_all[,11:(ncol(snpEff_all) -1)])
-#260 strains
+#260 strains, 74797 variants
 
 #subset to only missense variants 
 snpEff_no_intergenic<- snpEff_all[snpEff_all$TYPE == "missense_variant",]
@@ -193,11 +191,11 @@ colSums(by_variant_output_df_all_but_vir)
 #write.table(by_variant_output_df, "variants_in_resistance_aleles.csv", sep=",", row.names = TRUE, col.names = TRUE, quote = FALSE)
 #write.table(by_variant_output_df_all_but_vir, "all_nonsyn_variants_in_cyp51a.csv", sep=",", row.names = TRUE, col.names = TRUE, quote = FALSE)
 
-
+colSums(by_variant_output_df)
 ##map onto tree
 
 #set colors by group for clade
-grA_me<- split(Afum_grp$strain, Afum_grp$pop)
+grA_me<- split(Afum_grp$name_pop_genome, Afum_grp$clade)
 tree_grA_me <- ggtree::groupOTU(tree, grA_me)
 str(tree_grA_me)
 levels(attributes(tree_grA_me)$group) 
