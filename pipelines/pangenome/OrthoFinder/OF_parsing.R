@@ -1,5 +1,5 @@
-#A fum pan genome analysis, using proteins and OrthoFinder
-#last updated: 4.Dec.2021
+#A fum pan genome analysis, using proteins clustered by Ortho Finder results
+#last updated: 6.Dec.2021
 
 #set packages 
 library(data.table)
@@ -22,6 +22,7 @@ setwd("~/Desktop/Project_Afum_pangenome_2/")
 OF.gene_counts<-as.data.frame(fread("Orthogroups.GeneCount.tsv")) 
 OF.gene_families<-as.data.frame(fread("Orthogroups.tsv")) 
 OF.unassigned<- as.data.frame(fread("Orthogroups_UnassignedGenes.tsv")) #this is where your singletons live
+
 
 #combine OF families with singletons
 OF.gene_families_all<- rbind(OF.gene_families, OF.unassigned)
@@ -193,13 +194,27 @@ all_accessory<- all_accessory_1[rowSums(all_accessory_1) < cutoff,]
 #subset to get only singletons 
 singletons_only<- gene_fam_by_strain_ones_num[rowSums(gene_fam_by_strain_ones_num) == 1,]
 
-#get average accessory
-ave_accessory<- colSums(!is.na(all_accessory))
-mean(ave_accessory) #4334, vs. 974.3769 with pirate
+
+#get average accessory per genome
+ave_accessory<- colSums(all_accessory)
+mean(ave_accessory) #1163.338, vs. 974.3769 with pirate
+#variance
+accessory_variance<- var(ave_accessory)
+accessory_variance #14,087.88
+#sd
+accesory_sd<- sd(ave_accessory)
+accesory_sd #0.4420526
 
 #get average singletons
 ave_singletons<- colSums(singletons_only)
 mean(ave_singletons) #8.112, vs. 12.5308 with pirate
+#variance
+singletons_variance<- var(ave_singletons)
+singletons_variance #166.9643
+#sd
+singletons_sd<- sd(ave_singletons)
+singletons_sd #12.92147
+
 
 #fix names (remove X's that were auto-added)
 names(all_accessory)<- sapply(names(all_accessory), gsub, pattern = "X", replacement = "" )
@@ -746,7 +761,7 @@ setnames(anno_all, column_names)
 
 #rename cols so that they match 
 colnames(anno_all)[1] <- "OF_gene_fam"
-anno_all$InterPro_annotations_description
+
 
 #add anno col
 exclusive_to_clade1$interpro_annotation<- anno_all$InterPro_annotations_description[match(exclusive_to_clade1$OF_gene_fam, anno_all$OF_gene_fam)]
