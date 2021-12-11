@@ -1,0 +1,23 @@
+Reads Used:           	12459620	(1245962000 bases)
+
+Mapping:          	63.359 seconds.
+Reads/sec:       	196652.54
+kBases/sec:      	19665.25
+
+
+Read 1 data:      	pct reads	num reads 	pct bases	   num bases
+
+mapped:          	 95.9353% 	 11953176 	 95.9353% 	  1195317600
+unambiguous:     	 95.2126% 	 11863125 	 95.2126% 	  1186312500
+ambiguous:       	  0.7227% 	    90051 	  0.7227% 	     9005100
+low-Q discards:  	  0.1601% 	    19945 	  0.1601% 	     1994500
+
+perfect best site:	 82.5101% 	 10280443 	 82.5101% 	  1028044300
+semiperfect site:	 82.7941% 	 10315832 	 82.7941% 	  1031583200
+
+Match Rate:      	      NA 	       NA 	 98.4026% 	  1191000153
+Error Rate:      	 13.3703% 	  1601414 	  1.5515% 	    18778886
+Sub Rate:        	 13.3195% 	  1595338 	  0.3082% 	     3730676
+Del Rate:        	  0.1630% 	    19529 	  1.2407% 	    15016533
+Ins Rate:        	  0.1044% 	    12505 	  0.0026% 	       31677
+N Rate:          	  0.7246% 	    86783 	  0.0459% 	      555094
