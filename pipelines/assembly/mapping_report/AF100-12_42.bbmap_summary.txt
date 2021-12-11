@@ -1,0 +1,50 @@
+Reads Used:           	504752	(76217552 bases)
+
+Mapping:          	6.314 seconds.
+Reads/sec:       	79936.24
+kBases/sec:      	12070.37
+
+
+Pairing data:   	pct pairs	num pairs 	pct bases	   num bases
+
+mated pairs:     	  0.2924% 	      738 	  0.2924% 	      222876
+bad pairs:       	  0.0020% 	        5 	  0.0020% 	        1510
+insert size avg: 	  212.03
+
+
+Read 1 data:      	pct reads	num reads 	pct bases	   num bases
+
+mapped:          	  0.4557% 	     1150 	  0.4557% 	      173650
+unambiguous:     	  0.4557% 	     1150 	  0.4557% 	      173650
+ambiguous:       	  0.0000% 	        0 	  0.0000% 	           0
+low-Q discards:  	  0.0000% 	        0 	  0.0000% 	           0
+
+perfect best site:	  0.1577% 	      398 	  0.1577% 	       60098
+semiperfect site:	  0.1577% 	      398 	  0.1577% 	       60098
+rescued:         	  0.0194% 	       49
+
+Match Rate:      	      NA 	       NA 	 86.9864% 	      156044
+Error Rate:      	 65.3913% 	      752 	 13.0136% 	       23345
+Sub Rate:        	 64.4348% 	      741 	  5.8560% 	       10505
+Del Rate:        	 13.8261% 	      159 	  3.1992% 	        5739
+Ins Rate:        	 34.9565% 	      402 	  3.9584% 	        7101
+N Rate:          	  0.0000% 	        0 	  0.0000% 	           0
+
+
+Read 2 data:      	pct reads	num reads 	pct bases	   num bases
+
+mapped:          	  0.4485% 	     1132 	  0.4485% 	      170932
+unambiguous:     	  0.4485% 	     1132 	  0.4485% 	      170932
+ambiguous:       	  0.0000% 	        0 	  0.0000% 	           0
+low-Q discards:  	  0.0000% 	        0 	  0.0000% 	           0
+
+perfect best site:	  0.1351% 	      341 	  0.1351% 	       51491
+semiperfect site:	  0.1351% 	      341 	  0.1351% 	       51491
+rescued:         	  0.0527% 	      133
+
+Match Rate:      	      NA 	       NA 	 83.5521% 	      152348
+Error Rate:      	 69.8763% 	      791 	 16.4474% 	       29990
+Sub Rate:        	 68.6396% 	      777 	  5.6313% 	       10268
+Del Rate:        	 13.9576% 	      158 	  6.2559% 	       11407
+Ins Rate:        	 40.0177% 	      453 	  4.5602% 	        8315
+N Rate:          	  0.0883% 	        1 	  0.0005% 	           1
