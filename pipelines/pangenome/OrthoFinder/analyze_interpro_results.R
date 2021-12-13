@@ -18,7 +18,7 @@ library(scales)
 library(cowplot)
 library(biostat)
 
-setwd("~/Desktop/Project_Afum_pangenome_2")
+#setwd("~/Desktop/Project_Afum_pangenome_2")
 
 anno_all<-as.data.frame(fread("Af.pan.genome.iprout.tsv", header = FALSE, sep = "\t", strip.white=TRUE, quote="", fill = TRUE))
 
