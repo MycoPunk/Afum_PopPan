@@ -1,3 +1,4 @@
+#this script creates STRUCTURE plots from STRUCTURE meanQ outputs, looks for introgression, and does stats and makes a figure to look at the marginal likelihood values for K
 
 #load packages
 library(pophelper)
@@ -7,25 +8,25 @@ library(svglite)
 library(tidyr)
 library(multcomp)
 
-#setwd("")
+setwd("")
 
-#first get the group assignments
+#first get the group assignments (note strain_names_in_order.csv is just the second col of the faststructure output Afum_260.nosex)
 inds <- read.table("strain_names_in_order.csv",header=FALSE,stringsAsFactors=F)
 inds$V1
 
+#load the first itteration of the meanQ files for K2:5
 ffiles <- list.files(path=".",pattern="*.meanQ",full.names=T)
 flist <- readQ(files=ffiles)
 
-length(flist[[1]])
-
-rownames(flist[[1]]) <- (inds$V1)
+#length(flist[[1]])
+#rownames(flist[[1]]) <- (inds$V1)
 if(length(unique(sapply(flist,nrow)))==1) flist <- lapply(flist,"rownames<-",inds$V1)
 # show row names of all runs and all samples
 lapply(flist, rownames)
 
 # view head of first converted file
 head(flist[[1]])
-#view file atributes like this
+#view file attributes like this
 attributes(flist[[1]])
 
 #tabulateQ
@@ -37,17 +38,16 @@ tabulateQ(flist, writetable=TRUE, sorttable=TRUE)
 sr1 <- summariseQ(tr1)
 summariseQ(tr1, writetable=TRUE)
 
-
 #plot
-p1 <- plotQ(alignK(sortQ(flist)[1:5]),imgoutput="join",returnplot=T,exportplot=F,quiet=T,basesize=11,
+p1 <- plotQ(alignK(sortQ(flist)[1:4]),imgoutput="join",returnplot=T,exportplot=F,quiet=T,basesize=11,
             clustercol=c("#56326E",
-                         "#ED7F6F",
                          "#ABA778",
+                         "#ED7F6F",
                          "#F2CC85", 
                          "#D4494E",
-                         "#7D7A70", 
-                         "#7E7A70"),
-            showlegend=T, legendlab=c("Clade 1","Clade 2","Clade 3","Clade 4","Clade 5", "Clade 6"),
+                         "#7D7A70"), 
+                         #"#7E7A70"),
+            showlegend=T, legendlab=c("Clade 1","Clade 2","Clade 3","Clade 4","Clade 5"),
             legendkeysize=10,legendtextsize=10,legendmargin=c(2,2,2,0),
             showindlab=F,useindlab=T,showyaxis=T, indlabsize = 4,
             sortind="all", sharedindlab = F, panelspacer=0.4,
@@ -60,17 +60,20 @@ grid.arrange(p1$plot[[1]])
 #get K=3
 flist2<- as.data.frame(flist[2])
 
-admixed<- flist2[apply(flist2[1:3], 1, function(x) all(x < .80)), ] 
+admixed<- flist2[apply(flist2[1:3], 1, function(x) all(x < .85)), ] 
 admixed
-#here there are 6 of them 
+nrow(admixed)
+#here there are 8 of them 
 
 #Afum_260.3.Cluster1 Afum_260.3.Cluster2 Afum_260.3.Cluster3
-#AF293             0.591927            0.408069            0.000003
-#CF098             0.592183            0.407814            0.000003
-#CM7632            0.608942            0.371715            0.019343
-#F18304            0.586671            0.413325            0.000003
-#F7763             0.682733            0.172096            0.145171
-#RSF2S8            0.367427            0.632569            0.000004
+#10-01-02-27            0.152166            0.000000            0.847833
+#12-7505220             0.298457            0.000000            0.701542
+#AF293                  0.812018            0.152990            0.034992
+#CF098                  0.812468            0.153031            0.034501
+#CM7632                 0.805103            0.157081            0.037816
+#F18304                 0.809874            0.153508            0.036618
+#F7763                  0.822984            0.160289            0.016727
+#RSF2S8                 0.416723            0.000000            0.583277
 
 
 #plot admixed individuals only
@@ -82,8 +85,8 @@ only_admixed<- sapply(flist,function(x) x[match(c(admixed_names),rownames(x)),])
 #plot
 p1 <- plotQ(alignK(sortQ(only_admixed)[2]),returnplot=T,exportplot=F,quiet=T,basesize=20,barsize = .5,
             clustercol=c("#56326E",
-                         "#ED7F6F",
                          "#ABA778",
+                         "#ED7F6F",
                          "#F2CC85", 
                          "#D4494E",
                          "#7D7A70", 
@@ -98,6 +101,7 @@ grid.arrange(p1$plot[[1]])
 
 #make plots from chooseK.py
 choose_k <- read.csv("choose_k_results.csv",header=FALSE, row.names = 1, stringsAsFactors=F, check.names = F)
+
 choose_k_sub<- choose_k[,4:ncol(choose_k)]
 #transpose
 choose_k_t<- data.frame(t(choose_k_sub))
@@ -124,10 +128,11 @@ colnames(flist2)<- c("1", "2", "3")
 flist2$clade_assignment<- colnames(flist2)[max.col(flist2,ties.method="first")]
 
 #get n in each clade 
-table(flist2$clade_assignment)
-#Clade 1 Clade 2 Clade 3 
-#200      45      15 
-#which is the same n assignments per clade as DAPCA 
+table(flist2$clade_assignment) #note this is the auto naming for groups "1","2",and "3" where "1" is Clade1, but "2" is actually Clade3 and "3" is actually Clade2 - the colors in the above plots reflect this
+#1   2   3 
+#200  15  45 
+
+#the total numbers of isolates in each group are consistent with DAPCA 
 
 #format for printing to match the DAPCA sup table. 
 colnames(flist2)<- c("prob_clade1", "prob_clade1", "prob_clade1", "clade_assignment")
@@ -137,7 +142,7 @@ print_df$strain<- row.names(print_df)
 print_df<- print_df[,c(ncol(print_df),1:(ncol(print_df)-1))]
 
 #write posteriors with assignments for supplemental table
-#write.table(print_df, "posteriors_fastSTRUCTURE.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+write.table(print_df, "posteriors_fastSTRUCTURE.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
 
 ###Run stats on what point is no longer a significant increase in K 
@@ -150,8 +155,6 @@ choose_k_sub_input<-as.data.frame(lapply(choose_k_sub_input,as.numeric))
 class(choose_k_sub_input$V5)
 
 K_diffs<-  data.frame(t(apply(choose_k_sub_input,1,diff)))
-
-#K_diffs_clean<- K_diffs[,-1]
 
 #rename confusing col headers
 colnames(K_diffs)<- seq(1:14)
@@ -178,6 +181,7 @@ summary(post.hoc, test = adjusted("bonferroni"))
 #does not increase significantly after k = 4
 
 #difference between K vals
+K_diffs_clean<- K_diffs[,-1]
 abs(mean(K_diffs_clean[,1])) #mean difference between K1 and K2
 abs(mean(K_diffs_clean[,2])) #mean difference between K2 and K3
 abs(mean(K_diffs_clean[,3])) #mean difference between K3 and K4
