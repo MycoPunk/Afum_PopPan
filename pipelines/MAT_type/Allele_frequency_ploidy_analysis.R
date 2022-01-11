@@ -1,5 +1,5 @@
 ##this script runs allele variation analysis to determine support for diploidy for nine A.fumigatus strains with full length alignments to both MAT1 and MAT2
-##Last updated 16.Apr.2021
+##Last updated 11.Jan.2022
 
 ##set wd
 setwd("")
@@ -18,8 +18,10 @@ library('grid')
 set.seed(666)
 
 ##read in data
-vcf<- read.vcfR("262_strains.selected.SNP.NO_TEs.vcf.gz") #W/o TE's and w 262 strains
-Afum_grp<-read.delim("grp_temp.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE)
+vcf<- read.vcfR("Pop_for_pan_260.v2.All.SNP.combined_selected.NO.TE.vcf.gz") #W/o TE's and w 260 strains
+#Processed variant: 361717
+
+#Afum_grp<-read.delim("grp_temp.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE)
 
 knitr::kable(vcf@gt[c(1:2,11,30),1:4])
 
@@ -71,8 +73,8 @@ Afum_AF100_12_5_all
 
 pdf(NULL)
 dev.control(displaylist="enable")
-hist(ad2[,"Afu_343-P/11"], breaks = seq(0,1,by=0.02), col = "#A9A578", xaxt="n", main = "Afu_343_P_11", xlab ="allele frequency", ylab = "depth frequency")
-hist(ad1[,"Afu_343-P/11"], breaks = seq(0,1,by=0.02), col = "#7D7A70", add = TRUE)
+hist(ad2[,"Afu_343-P-11"], breaks = seq(0,1,by=0.02), col = "#A9A578", xaxt="n", main = "Afu_343_P_11", xlab ="allele frequency", ylab = "depth frequency")
+hist(ad1[,"Afu_343-P-11"], breaks = seq(0,1,by=0.02), col = "#7D7A70", add = TRUE)
 axis(side=1, at=c(0,0.25,0.333,0.5,0.666,0.75,1), labels=c(0,"1/4","1/3","1/2","2/3","3/4",1))
 Afum_Afu_343_P_11_all <- recordPlot()
 invisible(dev.off())
@@ -93,19 +95,19 @@ Afum_Afu_B7586_CDC_30_all
 
 pdf(NULL)
 dev.control(displaylist="enable")
-hist(ad2[,"DMC2_AF100-1_18"], breaks = seq(0,1,by=0.02), col = "#A9A578", xaxt="n", main = "Afum_AF100_1_18", xlab ="allele frequency", ylab = "depth frequency")
-hist(ad1[,"DMC2_AF100-1_18"], breaks = seq(0,1,by=0.02), col = "#7D7A70", add = TRUE)
+hist(ad2[,"AF100-1_18"], breaks = seq(0,1,by=0.02), col = "#A9A578", xaxt="n", main = "Afum_AF100_1_18", xlab ="allele frequency", ylab = "depth frequency")
+hist(ad1[,"AF100-1_18"], breaks = seq(0,1,by=0.02), col = "#7D7A70", add = TRUE)
 axis(side=1, at=c(0,0.25,0.333,0.5,0.666,0.75,1), labels=c(0,"1/4","1/3","1/2","2/3","3/4",1))
 Afum_DMC2_AF100_1_18_all <- recordPlot()
 invisible(dev.off())
 grid::grid.newpage()
 Afum_DMC2_AF100_1_18_all
-#very clean, only very slight shoulders, no where hear 1/2 - haploid
+#very clean, only very slight shoulders, no where near 1/2 - haploid
 
 pdf(NULL)
 dev.control(displaylist="enable")
-hist(ad2[,"DMC2_AF100-1_3"], breaks = seq(0,1,by=0.02), col = "#A9A578", xaxt="n", main = "Afum_AF100_1_3", xlab ="allele frequency", ylab = "depth frequency")
-hist(ad1[,"DMC2_AF100-1_3"], breaks = seq(0,1,by=0.02), col = "#7D7A70", add = TRUE)
+hist(ad2[,"AF100-1_3"], breaks = seq(0,1,by=0.02), col = "#A9A578", xaxt="n", main = "Afum_AF100_1_3", xlab ="allele frequency", ylab = "depth frequency")
+hist(ad1[,"AF100-1_3"], breaks = seq(0,1,by=0.02), col = "#7D7A70", add = TRUE)
 axis(side=1, at=c(0,0.25,0.333,0.5,0.666,0.75,1), labels=c(0,"1/4","1/3","1/2","2/3","3/4",1))
 Afum_DMC2_AF100_1_3_all <- recordPlot()
 invisible(dev.off())
@@ -149,6 +151,27 @@ grid::grid.newpage()
 Afum_NCPF_7816_all
 #slight shoulders
 
+pdf(NULL)
+dev.control(displaylist="enable")
+hist(ad2[,"SF2S9"], breaks = seq(0,1,by=0.02), col = "#A9A578", xaxt="n", main = "SF2S9", xlab ="allele frequency", ylab = "depth frequency")
+hist(ad1[,"SF2S9"], breaks = seq(0,1,by=0.02), col = "#7D7A70", add = TRUE)
+axis(side=1, at=c(0,0.25,0.333,0.5,0.666,0.75,1), labels=c(0,"1/4","1/3","1/2","2/3","3/4",1))
+Afum_SF2S9_all <- recordPlot()
+invisible(dev.off())
+grid::grid.newpage()
+Afum_SF2S9_all
+#very slight shoulders
+
+pdf(NULL)
+dev.control(displaylist="enable")
+hist(ad2[,"AF100-12_7G"], breaks = seq(0,1,by=0.02), col = "#A9A578", xaxt="n", main = "AF100_12_7G", xlab ="allele frequency", ylab = "depth frequency")
+hist(ad1[,"AF100-12_7G"], breaks = seq(0,1,by=0.02), col = "#7D7A70", add = TRUE)
+axis(side=1, at=c(0,0.25,0.333,0.5,0.666,0.75,1), labels=c(0,"1/4","1/3","1/2","2/3","3/4",1))
+Afum_AF100_12_7G_all <- recordPlot()
+invisible(dev.off())
+grid::grid.newpage()
+Afum_AF100_12_7G_all
+#trim and investigate
 
 
 #remove homozygotes that overwhelm the plot, to focus on heterozygotes.
@@ -178,7 +201,7 @@ Afum_08_36_03_25_zoom <- recordPlot()
 invisible(dev.off())
 grid::grid.newpage()
 Afum_08_36_03_25_zoom 
-#shoulders - still look like noise.
+#shoulders - still look like noise?
 
 pdf(NULL)
 dev.control(displaylist="enable")
@@ -215,8 +238,8 @@ Afum_B7586_CDC_30_zoom
 
 pdf(NULL)
 dev.control(displaylist="enable")
-hist(ad2_df[,"DMC2_AF100.1_18"], breaks = seq(0,1,by=0.02), col = "#A9A578", xaxt="n", xlab =NA, ylab = NA)
-hist(ad1_df[,"DMC2_AF100.1_18"], breaks = seq(0,1,by=0.02), col = "#7D7A70", add = TRUE)
+hist(ad2_df[,"AF100.1_18"], breaks = seq(0,1,by=0.02), col = "#A9A578", xaxt="n", xlab =NA, ylab = NA)
+hist(ad1_df[,"AF100.1_18"], breaks = seq(0,1,by=0.02), col = "#7D7A70", add = TRUE)
 axis(side=1, at=c(0,0.25,0.333,0.5,0.666,0.75,1), labels=c(0,"1/4","1/3","1/2","2/3","3/4",1))
 Afum_DMC2_AF100_1_18_zoom <- recordPlot()
 invisible(dev.off())
@@ -226,8 +249,8 @@ Afum_DMC2_AF100_1_18_zoom
 
 pdf(NULL)
 dev.control(displaylist="enable")
-hist(ad2_df[,"DMC2_AF100.1_3"], breaks = seq(0,1,by=0.02), col = "#A9A578", xaxt="n", xlab =NA, ylab = NA)
-hist(ad1_df[,"DMC2_AF100.1_3"], breaks = seq(0,1,by=0.02), col = "#7D7A70", add = TRUE)
+hist(ad2_df[,"AF100.1_3"], breaks = seq(0,1,by=0.02), col = "#A9A578", xaxt="n", xlab =NA, ylab = NA)
+hist(ad1_df[,"AF100.1_3"], breaks = seq(0,1,by=0.02), col = "#7D7A70", add = TRUE)
 axis(side=1, at=c(0,0.25,0.333,0.5,0.666,0.75,1), labels=c(0,"1/4","1/3","1/2","2/3","3/4",1))
 Afum_DMC2_AF100_1_3_zoom <- recordPlot()
 invisible(dev.off())
@@ -268,6 +291,29 @@ grid::grid.newpage()
 Afum_NCPF_7816_zoom
 #shoulders
 
+pdf(NULL)
+dev.control(displaylist="enable")
+hist(ad2_df[,"SF2S9"], breaks = seq(0,1,by=0.02), col = "#A9A578", xaxt="n", xlab =NA, ylab = NA)
+hist(ad1_df[,"SF2S9"], breaks = seq(0,1,by=0.02), col = "#7D7A70", add = TRUE)
+axis(side=1, at=c(0,0.25,0.333,0.5,0.666,0.75,1), labels=c(0,"1/4","1/3","1/2","2/3","3/4",1))
+Afum_SF2S9_zoom <- recordPlot()
+invisible(dev.off())
+grid::grid.newpage()
+Afum_SF2S9_zoom
+#shoulders
+
+
+pdf(NULL)
+dev.control(displaylist="enable")
+hist(ad2_df[,"AF100.12_7G"], breaks = seq(0,1,by=0.02), col = "#A9A578", xaxt="n", xlab =NA, ylab = NA)
+hist(ad1_df[,"AF100.12_7G"], breaks = seq(0,1,by=0.02), col = "#7D7A70", add = TRUE)
+axis(side=1, at=c(0,0.25,0.333,0.5,0.666,0.75,1), labels=c(0,"1/4","1/3","1/2","2/3","3/4",1))
+Afum_AF100_12_7G_zoom <- recordPlot()
+invisible(dev.off())
+grid::grid.newpage()
+Afum_AF100_12_7G_zoom
+#large shoulders
+
 
 #plot all 
 dev.off()
@@ -280,7 +326,9 @@ p<-ggarrange(Afum_08_36_03_25_all,
              Afum_Afu_B7586_CDC_30_all,
              Afum_Afu_343_P_11_all,
              Afum_NCPF_7816_all,
-             ncol = 3, nrow = 3)
+             Afum_SF2S9_all,
+             Afum_AF100_12_7G_all,
+             ncol = 3, nrow = 4)
 ggsave("ploidy_by_allele_diversity_all.pdf",p, width=28, height=32, units="in")
 
 #plot zoom
@@ -293,6 +341,8 @@ q<-ggarrange(Afum_08_36_03_25_zoom,
              Afum_B7586_CDC_30_zoom,
              Afum_Afu_343_P_11_zoom,
              Afum_NCPF_7816_zoom,
-             ncol = 3, nrow = 3)
+             Afum_SF2S9_zoom,
+             Afum_AF100_12_7G_zoom,
+             ncol = 3, nrow = 4)
 ggsave("ploidy_by_allele_diversity_zoom.pdf",q, width=18, height=22, units="in")
 
