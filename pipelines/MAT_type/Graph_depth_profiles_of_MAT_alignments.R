@@ -1,6 +1,5 @@
 #this script creates figures of depth profiles over MAT loci for MAT-1 and MAT-2 for the 9 strains that have significant alignments to both idomorphs. 
 
-
 #set packages 
 library(data.table)
 library(tidyverse)
@@ -11,7 +10,7 @@ library(seqinr)
 library(ShortRead)
 
 
-setwd("~/Desktop/Project_Afum_pangenome/Raw_MAT_alignments")
+setwd("~/Desktop/Project_Afum_pangenome_3/Raw_MAT_alignments")
 fl <- list.files(path="MAT1-1/fastas",pattern="*.fa",full.names=T)
 fl
 #read in MAT1 fastas
@@ -37,6 +36,12 @@ MAT1_IFM_61407<- data.frame(read.fasta(file = "MAT1-1/fastas/IFM_61407.MAT1.cons
                              seqtype = "DNA",as.string = FALSE, set.attributes = FALSE, forceDNAtolower = TRUE))
 MAT1_NCPF_7816<- data.frame(read.fasta(file = "MAT1-1/fastas/NCPF-7816.MAT1.consensus.fa", 
                              seqtype = "DNA",as.string = FALSE, set.attributes = FALSE, forceDNAtolower = TRUE))
+MAT1_AF100_12_7G<- data.frame(read.fasta(file = "MAT1-1/fastas/AF100-12_7G.MAT1.consensus.fa", 
+                             seqtype = "DNA",as.string = FALSE, set.attributes = FALSE, forceDNAtolower = TRUE))
+MAT1_SF2S9<- data.frame(read.fasta(file = "MAT1-1/fastas/SF2S9.MAT1.consensus.fa", 
+                             seqtype = "DNA",as.string = FALSE, set.attributes = FALSE, forceDNAtolower = TRUE))
+
+
 
 #read in MAT2 fastas
 MAT2_08_36_03_25<- data.frame(read.fasta(file = "MAT1-2/fastas/08-36-03-25.MAT2.consensus.fa", 
@@ -61,6 +66,12 @@ MAT2_IFM_61407<- data.frame(read.fasta(file = "MAT1-2/fastas/IFM_61407.MAT2.cons
                             seqtype = "DNA",as.string = FALSE, set.attributes = FALSE, forceDNAtolower = TRUE))
 MAT2_NCPF_7816<- data.frame(read.fasta(file = "MAT1-2/fastas/NCPF-7816.MAT2.consensus.fa", 
                             seqtype = "DNA",as.string = FALSE, set.attributes = FALSE, forceDNAtolower = TRUE))
+MAT2_AF100_12_7G<- data.frame(read.fasta(file = "MAT1-2/fastas/AF100-12_7G.MAT2.consensus.fa", 
+                            seqtype = "DNA",as.string = FALSE, set.attributes = FALSE, forceDNAtolower = TRUE))
+MAT2_SF2S9<- data.frame(read.fasta(file = "MAT1-2/fastas/SF2S9.MAT2.consensus.fa", 
+                            seqtype = "DNA",as.string = FALSE, set.attributes = FALSE, forceDNAtolower = TRUE))
+
+
 
 #read in all depth files
 dp <- list.files(path="MAT1-1/depth",pattern="*",full.names=T)
@@ -76,6 +87,9 @@ MAT1_DMC2_AF100_1_3_depth<- read.table("MAT1-1/depth/DMC2_AF100-1_3.MAT1.coverag
 MAT1_IFM_59359_depth<- read.table("MAT1-1/depth/IFM_59359.MAT1.coverage", header = FALSE, sep = "", colClasses=c("NULL", "NULL", NA))
 MAT1_IFM_61407_depth<- read.table("MAT1-1/depth/IFM_61407.MAT1.coverage", header = FALSE, sep = "", colClasses=c("NULL", "NULL", NA))
 MAT1_NCPF_7816_depth<- read.table("MAT1-1/depth/NCPF-7816.MAT1.coverage", header = FALSE, sep = "", colClasses=c("NULL", "NULL", NA))
+MAT1_SF2S9_depth<- read.table("MAT1-1/depth/SF2S9.MAT1.coverage", header = FALSE, sep = "", colClasses=c("NULL", "NULL", NA))
+MAT1_AF100_12_7G_depth<- read.table("MAT1-1/depth/AF100-12_7G.MAT1.coverage", header = FALSE, sep = "", colClasses=c("NULL", "NULL", NA))
+
 
 MAT2_08_36_03_25_depth<- read.table("MAT1-2/depth/08-36-03-25.MAT2.coverage", header = FALSE, sep = "", colClasses=c("NULL", "NULL", NA))
 MAT2_AF100_12_5_depth<- read.table("MAT1-2/depth/AF100-12_5.MAT2.coverage", header = FALSE, sep = "", colClasses=c("NULL", "NULL", NA))
@@ -88,6 +102,9 @@ MAT2_DMC2_AF100_1_3_depth<- read.table("MAT1-2/depth/DMC2_AF100-1_3.MAT2.coverag
 MAT2_IFM_59359_depth<- read.table("MAT1-2/depth/IFM_59359.MAT2.coverage", header = FALSE, sep = "", colClasses=c("NULL", "NULL", NA))
 MAT2_IFM_61407_depth<- read.table("MAT1-2/depth/IFM_61407.MAT2.coverage", header = FALSE, sep = "", colClasses=c("NULL", "NULL", NA))
 MAT2_NCPF_7816_depth<- read.table("MAT1-2/depth/NCPF-7816.MAT2.coverage", header = FALSE, sep = "", colClasses=c("NULL", "NULL", NA))
+MAT2_SF2S9_depth<- read.table("MAT1-2/depth/SF2S9.MAT2.coverage", header = FALSE, sep = "", colClasses=c("NULL", "NULL", NA))
+MAT2_AF100_12_7G_depth<- read.table("MAT1-2/depth/AF100-12_7G.MAT2.coverage", header = FALSE, sep = "", colClasses=c("NULL", "NULL", NA))
+
 
 #bind
 MAT1_08_36_03_25_all<- data.frame(cbind("seq" = MAT1_08_36_03_25[,1], "depth" = as.numeric(MAT1_08_36_03_25_depth$V3)))
@@ -101,6 +118,9 @@ MAT1_DMC2_AF100_1_3_all<- data.frame(cbind("seq" = MAT1_DMC2_AF100_1_3[,1], "dep
 MAT1_IFM_59359_all<- data.frame(cbind("seq" = MAT1_IFM_59359[,1], "depth" = as.numeric(MAT1_IFM_59359_depth$V3)))
 MAT1_IFM_61407_all<- data.frame(cbind("seq" = MAT1_IFM_61407[,1], "depth" = as.numeric(MAT1_IFM_61407_depth$V3)))
 MAT1_NCPF_7816_all<- data.frame(cbind("seq" = MAT1_NCPF_7816[,1], "depth" = as.numeric(MAT1_NCPF_7816_depth$V3)))
+MAT1_SF2S9_all<- data.frame(cbind("seq" = MAT1_SF2S9[,1], "depth" = as.numeric(MAT1_SF2S9_depth$V3)))
+MAT1_AF100_12_7G_all<- data.frame(cbind("seq" = MAT1_AF100_12_7G[,1], "depth" = as.numeric(MAT1_AF100_12_7G_depth$V3)))
+
 
 MAT2_08_36_03_25_all<- data.frame(cbind("seq" = MAT2_08_36_03_25[,1], "depth" = as.numeric(MAT2_08_36_03_25_depth$V3)))
 MAT2_AF100_12_5_all<- data.frame(cbind("seq" = MAT2_AF100_12_5[,1], "depth" = as.numeric(MAT2_AF100_12_5_depth$V3)))
@@ -113,6 +133,9 @@ MAT2_DMC2_AF100_1_3_all<- data.frame(cbind("seq" = MAT2_DMC2_AF100_1_3[,1], "dep
 MAT2_IFM_59359_all<- data.frame(cbind("seq" = MAT2_IFM_59359[,1], "depth" = as.numeric(MAT2_IFM_59359_depth$V3)))
 MAT2_IFM_61407_all<- data.frame(cbind("seq" = MAT2_IFM_61407[,1], "depth" = as.numeric(MAT2_IFM_61407_depth$V3)))
 MAT2_NCPF_7816_all<- data.frame(cbind("seq" = MAT2_NCPF_7816[,1], "depth" = as.numeric(MAT2_NCPF_7816_depth$V3)))
+MAT2_SF2S9_all<- data.frame(cbind("seq" = MAT2_SF2S9[,1], "depth" = as.numeric(MAT2_SF2S9_depth$V3)))
+MAT2_AF100_12_7G_all<- data.frame(cbind("seq" = MAT2_AF100_12_7G[,1], "depth" = as.numeric(MAT2_AF100_12_7G_depth$V3)))
+
 
 #graph
 MAT1_08_36_03_25_all$pos = as.numeric(rownames(MAT1_08_36_03_25_all))
@@ -312,6 +335,45 @@ plotNCPF_7816<- ggplot(MAT1_NCPF_7816_all, aes(x=pos, y=depth)) +
 plotNCPF_7816_final<- plotNCPF_7816+ theme(aspect.ratio=1/8, axis.text=element_text(size=6), legend.title = element_blank()) + ggtitle("Afum_NCPF_7816")
 plotNCPF_7816_final
 
+#SF2S9
+MAT1_SF2S9_all$pos = as.numeric(rownames(MAT1_SF2S9_all))
+MAT1_SF2S9_all$depth<- as.numeric(MAT1_SF2S9_all$depth)
+MAT2_SF2S9_all$pos = as.numeric(rownames(MAT2_SF2S9_all))
+MAT2_SF2S9_all$depth<- as.numeric(MAT2_SF2S9_all$depth)
+
+plotSF2S9<- ggplot(MAT1_SF2S9_all, aes(x=pos, y=depth)) + 
+  geom_point(shape=20, size=1, aes(color = "grey")) + theme_classic() +
+  #add BPs
+  #scale_x_discrete(limits = as.factor(MAT1_SF2S9_all$pos), 
+  #                labels = MAT1_SF2S9_all$seq) +
+  geom_point(data = MAT2_SF2S9_all, shape=20, size=1, aes(color = "red"))+
+  scale_colour_manual(values=c("red", "grey"),
+                      labels = c('MAT1', 'MAT2'))
+
+plotSF2S9_final<- plotSF2S9+ theme(aspect.ratio=1/8, axis.text=element_text(size=6), legend.title = element_blank()) + ggtitle("Afum_SF2S9")
+plotSF2S9_final
+
+#AF100_12_7G
+MAT1_AF100_12_7G_all$pos = as.numeric(rownames(MAT1_AF100_12_7G_all))
+MAT1_AF100_12_7G_all$depth<- as.numeric(MAT1_AF100_12_7G_all$depth)
+MAT2_AF100_12_7G_all$pos = as.numeric(rownames(MAT2_AF100_12_7G_all))
+MAT2_AF100_12_7G_all$depth<- as.numeric(MAT2_AF100_12_7G_all$depth)
+
+plotAF100_12_7G<- ggplot(MAT1_AF100_12_7G_all, aes(x=pos, y=depth)) + 
+  geom_point(shape=20, size=1, aes(color = "grey")) + theme_classic() +
+  #add BPs
+  #scale_x_discrete(limits = as.factor(MAT1_AF100_12_7G_all$pos), 
+  #                labels = MAT1_AF100_12_7G_all$seq) +
+  geom_point(data = MAT2_AF100_12_7G_all, shape=20, size=1, aes(color = "red"))+
+  scale_colour_manual(values=c("red", "grey"),
+                      labels = c('MAT1', 'MAT2'))
+
+plotAF100_12_7G_final<- plotAF100_12_7G+ theme(aspect.ratio=1/8, axis.text=element_text(size=6), legend.title = element_blank()) + ggtitle("Afum_AF100_12_7G")
+plotAF100_12_7G_final
+
+
+
+
 #install.packages("ggpubr")
 library(ggpubr)
 #plot all 
@@ -325,16 +387,10 @@ p<-ggarrange(plotAF90_final, plotAF293_final,
           plotDMC2_AF100_1_3_final,
           plotIFM_59359_final,
           plotIFM_61407_final,
+          plotSF2S9_final,
+          plotAF100_12_7G_final,
 labels = c("MAT-1 control", "MAT-2 control", "", "", "", "", ""),
-          ncol = 2, nrow = 6)
-ggsave("MAT_alignments.pdf",p, width=10, height=9, units="in")
-
-#graph subset AF100's with controls
-ggarrange(plotAF90_final, 
-          plotAF293_final, 
-          plotAF100_12_5_final,
-          plotDMC2_AF100_1_18_final,
-          plotDMC2_AF100_1_3_final,
-          labels = c("", "", "", "", "", "", ""),
-          ncol = 1, nrow = 5)
+          ncol = 2, nrow = 7)
+#p
+ggsave("MAT_alignments_11.Jan.2022.pdf",p, width=10, height=9, units="in")
 
