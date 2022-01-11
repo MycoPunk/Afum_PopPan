@@ -21,8 +21,6 @@ set.seed(666)
 vcf<- read.vcfR("Pop_for_pan_260.v2.All.SNP.combined_selected.NO.TE.vcf.gz") #W/o TE's and w 260 strains
 #Processed variant: 361717
 
-#Afum_grp<-read.delim("grp_temp.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE)
-
 knitr::kable(vcf@gt[c(1:2,11,30),1:4])
 
 #depth each allele was sequence at 
