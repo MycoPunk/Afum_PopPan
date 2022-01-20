@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --mem=64G -p batch --nodes 1 --ntasks 2 --out logs/sep_summaries.log
+#SBATCH --mem=64G -p batch --nodes 1 --ntasks 2 --out logs/average_summaries_ea.log
 
 module load R
 
