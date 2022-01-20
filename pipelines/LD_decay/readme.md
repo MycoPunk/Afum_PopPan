@@ -28,8 +28,9 @@ This script runs LD decay in plink
 **03_create_summary.sh**<br>
 This script creates a summary of pairwise distances w/ distance in the first col, and R2 in the second. <br>
 
-**04_average_summaries.sh** runs th script **04_average_summaries.R** which generates the mean R2 value for each distance for each itteration, generating 20 files per group (clades 1-3 or all)
+**04_average_summaries_ea.sh** runs th script **04_average_summaries_ea.R** which generates the mean R2 value for each distance, generating 20 files per group (clades 1-3 or all). The BASH script itterates over each file produced in step 03 by creating a unique file name variable that is iteratively piped into the R script to sifnigicantly speed up the processing. Note, on smaller LD files, this step is not necesary, and everything can be averaged across all runs for all positions in one step (just skip to step 05 and remove the "ea" match from the input search (pattern = glob2rx("<name>*ea*")) to read in the input from step 03. However, at a sample size of n=12 X 20 reps on isolates with significant population structure, memory requirements are unreasonable and exceed 800GB for aggregation, so step 04 must be run first. <br>
 
-**06_plot_LD.sh** runs two plotting scripts: <br>
-**05_plot_LD_decay_zoomed_in.R** plots a zoomed in view of LD decay, over 10bp windows, and <br>
+**05_average_summaries_all.sh** runs th script **05_average_summaries_all.R** which averages the mean R2 value for each distance for each itteration, generating 1 files per group (clades 1-3 or all).
+
+**06_plot_LD.sh** runs the plotting script **05_plot_LD_decay_zoomed_in.R** plots a zoomed in view of LD decay, over 10bp windows, and <br>
 **05_plot_LD_decay_LD50.R** plots LD decay over the entier length of the dataset, including arrows at LD50 for each clade
