@@ -32,4 +32,4 @@ This script creates a summary of pairwise distances w/ distance in the first col
 
 **05_average_summaries_all.sh** runs th script **05_average_summaries_all.R** which averages the mean R2 value for each distance for each itteration, generating 1 files per group (clades 1-3 or all).
 
-**06_plot_LD.sh** runs the plotting script **05_plot_LD_decay_zoomed_in.R** plots a zoomed in view of LD decay, over 10bp windows, and <br>
+**06_plot_LD_decay.sh** runs the script **06_plot_LD_decay.R** to calculate LD decay in BP and plot the figures presented in the paper. 
