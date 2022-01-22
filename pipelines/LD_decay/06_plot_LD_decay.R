@@ -54,35 +54,6 @@ gm<- data.frame(Clade = c("All", "Clade1", "Clade2", "Clade3"),
                          LD50_C3_x))
 
 
-
-
-
-
-#BS1
-#plot(rsq_means_all.1.1$mid, rsq_means_all.1.1$mean, xlab = "pairwise distance (bp)", ylab = "Rsq", main = "A. fum all, block size =1")
-#abline(h=LD50_all_BS.1_y, col = "red")
-#find approximate intersection for x (bp value)
-#LD50_all_x1 <- approx(x = rsq_means_all.1.1$mean, y = rsq_means_all.1.1$mid, xout = LD50_all_BS.1_y)$y
-#LD50_all_x1
-#abline(v=LD50_all_x1, col = "red")
-#text(x = 200000, y = 0.5, labels = round(LD50_all_x1, 2))
-
-
-
-#approximate x given y from loess curves
-#gm_1x <- approx(x = loess_C1$fitted, y = loess_C1$x, xout = gm_1)$y
-#gm_1x
-#gm_2x <- approx(x = loess_C2$fitted, y = loess_C2$x, xout = gm_2)$y
-#gm_2x
-#gm_3x <- approx(x = loess_C3$fitted, y = loess_C3$x, xout = gm_3)$y
-#gm_3x
-#gm_allx <- approx(x = loess_all$fitted, y = loess_all$x, xout = gm_4)$y
-#gm_allx
-#approximate x given y - old 
-#gm_C1_oldx <- approx(x = loess_C1_windows$fitted, y = loess_C1_windows$x, xout = gm_C1_old)$y
-#gm_C1_oldx
-
-
 #set pallet
 myCol <- c(All = "dark grey",
            Clade1 = "#56326E",
@@ -98,14 +69,14 @@ rsq_means_grand<- data.frame(rbind(rsq_means_Clade1_no_sample,
 
 nrow(rsq_means_grand) #too many data points for easy plot rendering
 #subset for east rendering
-random_input<- rsq_means_grand[sample(nrow(rsq_means_grand), 100000),]
+random_input<- rsq_means_grand[sample(nrow(rsq_means_grand), 20000),]
 nrow(random_input)
 
 ##plot all
 sp<- ggplot(data=random_input,aes(x=dist,y=rsq.mean))+
   geom_line(data=random_input, aes(color=Clade),size=0.1,alpha=0.9)+
-  geom_smooth(aes(color = Clade), show.legend = FALSE) +
-  geom_smooth(aes(color = Clade), se=FALSE) +
+  geom_smooth(aes(color = Clade), show.legend = FALSE, size=.8) +
+  geom_smooth(aes(color = Clade), se=FALSE, size=.8) +
   labs(x="Distance (BP)",y=expression(LD~(r^{2})))+
   theme_bw() + scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8))
 all_print<- sp + scale_color_manual(values=myCol)
@@ -129,20 +100,20 @@ rsq_means_grand_zoom<- data.frame(rbind(rsq_means_C1_zoom,
 #plot
 sp_zoom<- ggplot(data=rsq_means_grand_zoom,aes(x=dist,y=rsq.mean))+
   geom_line(data=rsq_means_grand_zoom, aes(color=Clade),size=0.1,alpha=0.9)+
-  geom_smooth(aes(color = Clade), show.legend = FALSE) +
-  geom_smooth(aes(color = Clade), se=FALSE) +
+  #geom_smooth(aes(color = Clade), show.legend = FALSE) +
+  #geom_smooth(aes(color = Clade), se=FALSE) +
   labs(x="Distance (BP) log scale",y=expression(LD~(r^{2})))+
   theme_bw()
 zoom_print<- sp_zoom + scale_color_manual(values=myCol) + 
   #add lines to indicate the point at which each Clade is half decayed
   geom_segment(aes(x = gm[1,3], y = .08, xend = gm[1,3], yend = 0), colour = "dark grey",
-               arrow = arrow(length = unit(0.25, "cm"), type = "closed")) +
+               arrow = arrow(length = unit(0.15, "cm"), type = "closed")) +
   geom_segment(aes(x = gm[2,3], y = .08, xend = gm[2,3], yend = 0), colour = "#56326E",
-               arrow = arrow(length = unit(0.25, "cm"), type = "closed")) +
+               arrow = arrow(length = unit(0.15, "cm"), type = "closed")) +
   geom_segment(aes(x = gm[3,3], y = .08, xend = gm[3,3], yend = 0), colour = "#ED7F6F",
-               arrow = arrow(length = unit(0.25, "cm"), type = "closed")) + 
+               arrow = arrow(length = unit(0.15, "cm"), type = "closed")) + 
   geom_segment(aes(x = gm[4,3], y = .08, xend = gm[4,3], yend = 0), colour = "#ABA778",
-               arrow = arrow(length = unit(0.25, "cm"), type = "closed")) +
+               arrow = arrow(length = unit(0.15, "cm"), type = "closed")) +
    scale_x_log10() +
   scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8))
 
@@ -208,14 +179,14 @@ rsq_means_grand<- data.frame(rbind(rsq_means_Clade1_n12,
 
 nrow(rsq_means_grand) #too many data points for easy plot rendering
 #subset for east rendering
-random_input<- rsq_means_grand[sample(nrow(rsq_means_grand), 100000),]
+random_input<- rsq_means_grand[sample(nrow(rsq_means_grand), 20000),]
 nrow(random_input)
 
 ##plot all
 sp2<- ggplot(data=random_input,aes(x=dist,y=rsq.mean))+
   geom_line(data=random_input, aes(color=Clade),size=0.1,alpha=0.9)+
-  geom_smooth(aes(color = Clade), show.legend = FALSE) +
-  geom_smooth(aes(color = Clade), se=FALSE) +
+  geom_smooth(aes(color = Clade), show.legend = FALSE, size=.8) +
+  geom_smooth(aes(color = Clade), se=FALSE, size=.8) +
   labs(x="Distance (BP)",y=expression(LD~(r^{2})))+
   theme_bw() + scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8))
 all_print2<- sp2 + scale_color_manual(values=myCol)
@@ -239,20 +210,20 @@ rsq_means_grand_zoom<- data.frame(rbind(rsq_means_C1_zoom,
 #plot
 sp_zoom2<- ggplot(data=rsq_means_grand_zoom,aes(x=dist,y=rsq.mean))+
   geom_line(data=rsq_means_grand_zoom, aes(color=Clade),size=0.1,alpha=0.9)+
-  geom_smooth(aes(color = Clade), show.legend = FALSE) +
-  geom_smooth(aes(color = Clade), se=FALSE) +
+#  geom_smooth(aes(color = Clade), show.legend = FALSE) +
+#  geom_smooth(aes(color = Clade), se=FALSE) +
   labs(x="Distance (BP) log scale",y=expression(LD~(r^{2})))+
   theme_bw()
 zoom_print2<- sp_zoom2 + scale_color_manual(values=myCol) + 
   #add lines to indicate the point at which each Clade is half decayed
   geom_segment(aes(x = gm2[1,3], y = .08, xend = gm2[1,3], yend = 0), colour = "dark grey",
-               arrow = arrow(length = unit(0.25, "cm"), type = "closed")) +
+               arrow = arrow(length = unit(0.15, "cm"), type = "closed")) +
   geom_segment(aes(x = gm2[2,3], y = .08, xend = gm2[2,3], yend = 0), colour = "#56326E",
-               arrow = arrow(length = unit(0.25, "cm"), type = "closed")) +
+               arrow = arrow(length = unit(0.15, "cm"), type = "closed")) +
   geom_segment(aes(x = gm2[3,3], y = .08, xend = gm2[3,3], yend = 0), colour = "#ED7F6F",
-               arrow = arrow(length = unit(0.25, "cm"), type = "closed")) + 
+               arrow = arrow(length = unit(0.15, "cm"), type = "closed")) + 
   geom_segment(aes(x = gm2[4,3], y = .08, xend = gm2[4,3], yend = 0), colour = "#ABA778",
-               arrow = arrow(length = unit(0.25, "cm"), type = "closed")) +
+               arrow = arrow(length = unit(0.15, "cm"), type = "closed")) +
   scale_x_log10() +
   scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8))
 
@@ -262,5 +233,4 @@ p2<-ggarrange(all_print, zoom_print,
               #labels = c("", ""),
               ncol = 2, nrow = 4)
 #p2
-ggsave("LD_decay_at_n12.pdf",p2, width=9, height=7, units="in")
-
+ggsave("LD_decay_at_n12_20000pts.pdf",p2, width=9, height=7, units="in")
