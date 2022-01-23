@@ -5,7 +5,7 @@ library(purrr)
 library(data.table)
 library(ggpubr)
 
-setwd("~/bigdata/pop_genomics/LD_decay_3/LD_out")
+#setwd("")
 
 #set seed for reproducibility
 set.seed(666)
@@ -68,15 +68,15 @@ rsq_means_grand<- data.frame(rbind(rsq_means_Clade1_no_sample,
 
 
 nrow(rsq_means_grand) #too many data points for easy plot rendering
-#subset for east rendering
-random_input<- rsq_means_grand[sample(nrow(rsq_means_grand), 20000),]
+#subset for rendering
+random_input<- rsq_means_grand[sample(nrow(rsq_means_grand), 10000),]
 nrow(random_input)
 
 ##plot all
 sp<- ggplot(data=random_input,aes(x=dist,y=rsq.mean))+
-  geom_line(data=random_input, aes(color=Clade),size=0.1,alpha=0.9)+
-  geom_smooth(aes(color = Clade), show.legend = FALSE, size=.8) +
-  geom_smooth(aes(color = Clade), se=FALSE, size=.8) +
+  geom_line(data=random_input, aes(color=Clade),size=0.15,alpha=0.9)+
+  #geom_smooth(aes(color = Clade), show.legend = FALSE, size=.8) +
+  #geom_smooth(aes(color = Clade), se=FALSE, size=.8) +
   labs(x="Distance (BP)",y=expression(LD~(r^{2})))+
   theme_bw() + scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8))
 all_print<- sp + scale_color_manual(values=myCol)
@@ -84,25 +84,49 @@ all_print<- sp + scale_color_manual(values=myCol)
 
 
 ##plot zoomed in
-#subset to only the first 10,000 bp
-rsq_means_all_zoom<- rsq_means_all[1:20000,]
+##plot zoomed in
+#subset to only the first 20,000 bp - but 
+rsq_means_all_n12_zoom<- rsq_means_all[1:20000,]
 rsq_means_C1_zoom<- rsq_means_Clade1_no_sample[1:20000,]
 rsq_means_C2_zoom<- rsq_means_Clade2_no_sample[1:20000,]
 rsq_means_C3_zoom<- rsq_means_Clade3_no_sample[1:20000,]
 
+#retain the first positions for detailed graphing 
+rsq_means_all_n12_zoom_first<- rsq_means_all_n12_zoom[1:20,]
+rsq_means_C1_zoom_first<- rsq_means_C1_zoom[1:20,]
+rsq_means_C2_zoom_first<- rsq_means_C2_zoom[1:20,]
+rsq_means_C3_zoom_first<- rsq_means_C3_zoom[1:20,]
 
-rsq_means_grand_zoom<- data.frame(rbind(rsq_means_C1_zoom,
-                                        rsq_means_C2_zoom,
-                                        rsq_means_C3_zoom,
-                                        rsq_means_all_zoom))
+#retain the last positions for subsetting (so the graph is managibly small)
+rsq_means_all_n12_zoom_last<- rsq_means_all_n12_zoom[21:nrow(rsq_means_all_n12_zoom),]
+rsq_means_C1_zoom_last<- rsq_means_C1_zoom[21:nrow(rsq_means_C1_zoom),]
+rsq_means_C2_zoom_last<- rsq_means_C2_zoom[21:nrow(rsq_means_C2_zoom),]
+rsq_means_C3_zoom_last<- rsq_means_C3_zoom[21:nrow(rsq_means_C3_zoom),]
 
+#subset the lasts
+rsq_means_all_n12_zoom_last_subet<- rsq_means_all_n12_zoom_last[sample(nrow(rsq_means_all_n12_zoom_last), 8000),]
+rsq_means_C1_zoom_last_subet<- rsq_means_C1_zoom_last[sample(nrow(rsq_means_C1_zoom_last), 8000),]
+rsq_means_C2_zoom_last_subet<- rsq_means_C2_zoom_last[sample(nrow(rsq_means_C2_zoom_last), 8000),]
+rsq_means_C3_zoom_last_subet<- rsq_means_C3_zoom_last[sample(nrow(rsq_means_C3_zoom_last), 8000),]
+
+#bind first and last
+rsq_means_all_n12_zoom_all<- rbind(rsq_means_all_n12_zoom_first, rsq_means_all_n12_zoom_last_subet)
+rsq_means_all_C1_zoom_all<- rbind(rsq_means_C1_zoom_first, rsq_means_C1_zoom_last_subet)
+rsq_means_all_C2_zoom_all<- rbind(rsq_means_C2_zoom_first, rsq_means_C2_zoom_last_subet)
+rsq_means_all_C3_zoom_all<- rbind(rsq_means_C3_zoom_first, rsq_means_C3_zoom_last_subet)
+
+#bind
+rsq_means_grand_zoom<- data.frame(rbind(rsq_means_all_n12_zoom_all,
+                                         rsq_means_all_C1_zoom_all,
+                                         rsq_means_all_C2_zoom_all,
+                                         rsq_means_all_C3_zoom_all))
 
 #plot
 sp_zoom<- ggplot(data=rsq_means_grand_zoom,aes(x=dist,y=rsq.mean))+
-  geom_line(data=rsq_means_grand_zoom, aes(color=Clade),size=0.1,alpha=0.9)+
+  geom_line(data=rsq_means_grand_zoom, aes(color=Clade),size=0.15,alpha=0.9)+
   #geom_smooth(aes(color = Clade), show.legend = FALSE) +
   #geom_smooth(aes(color = Clade), se=FALSE) +
-  labs(x="Distance (BP) log scale",y=expression(LD~(r^{2})))+
+  labs(x="Distance (log BP)",y=expression(LD~(r^{2})))+
   theme_bw()
 zoom_print<- sp_zoom + scale_color_manual(values=myCol) + 
   #add lines to indicate the point at which each Clade is half decayed
@@ -178,15 +202,15 @@ rsq_means_grand<- data.frame(rbind(rsq_means_Clade1_n12,
 
 
 nrow(rsq_means_grand) #too many data points for easy plot rendering
-#subset for east rendering
-random_input<- rsq_means_grand[sample(nrow(rsq_means_grand), 20000),]
-nrow(random_input)
+#subset for rendering
+random_input2<- rsq_means_grand[sample(nrow(rsq_means_grand), 10000),]
+nrow(random_input2)
 
 ##plot all
-sp2<- ggplot(data=random_input,aes(x=dist,y=rsq.mean))+
-  geom_line(data=random_input, aes(color=Clade),size=0.1,alpha=0.9)+
-  geom_smooth(aes(color = Clade), show.legend = FALSE, size=.8) +
-  geom_smooth(aes(color = Clade), se=FALSE, size=.8) +
+sp2<- ggplot(data=random_input2,aes(x=dist,y=rsq.mean))+
+  geom_line(data=random_input2, aes(color=Clade),size=0.15,alpha=0.9)+
+  #geom_smooth(aes(color = Clade), show.legend = FALSE, size=.8) +
+  #geom_smooth(aes(color = Clade), se=FALSE, size=.8) +
   labs(x="Distance (BP)",y=expression(LD~(r^{2})))+
   theme_bw() + scale_y_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8))
 all_print2<- sp2 + scale_color_manual(values=myCol)
@@ -194,25 +218,49 @@ all_print2<- sp2 + scale_color_manual(values=myCol)
 
 
 ##plot zoomed in
-#subset to only the first 10,000 bp
-rsq_means_all_n12_zoom<- rsq_means_all_n12[1:20000,]
-rsq_means_C1_zoom<- rsq_means_Clade1_n12[1:20000,]
-rsq_means_C2_zoom<- rsq_means_Clade2_n12[1:20000,]
-rsq_means_C3_zoom<- rsq_means_Clade3_n12[1:20000,]
+#subset to only the first 20,000 bp - but 
+rsq_means_all_n12_zoom2<- rsq_means_all_n12[1:20000,]
+rsq_means_C1_zoom2<- rsq_means_Clade1_n12[1:20000,]
+rsq_means_C2_zoom2<- rsq_means_Clade2_n12[1:20000,]
+rsq_means_C3_zoom2<- rsq_means_Clade3_n12[1:20000,]
 
+#retain the first positions for detailed graphing 
+rsq_means_all_n12_zoom_first2<- rsq_means_all_n12_zoom2[1:20,]
+rsq_means_C1_zoom_first2<- rsq_means_C1_zoom2[1:20,]
+rsq_means_C2_zoom_first2<- rsq_means_C2_zoom2[1:20,]
+rsq_means_C3_zoom_first2<- rsq_means_C3_zoom2[1:20,]
 
-rsq_means_grand_zoom<- data.frame(rbind(rsq_means_C1_zoom,
-                                        rsq_means_C2_zoom,
-                                        rsq_means_C3_zoom,
-                                        rsq_means_all_n12_zoom))
+#retain the last positions for subsetting (so the graph is a workable size)
+rsq_means_all_n12_zoom_last2<- rsq_means_all_n12_zoom2[21:nrow(rsq_means_all_n12_zoom2),]
+rsq_means_C1_zoom_last2<- rsq_means_C1_zoom2[21:nrow(rsq_means_C1_zoom2),]
+rsq_means_C2_zoom_last2<- rsq_means_C2_zoom2[21:nrow(rsq_means_C2_zoom2),]
+rsq_means_C3_zoom_last2<- rsq_means_C3_zoom2[21:nrow(rsq_means_C3_zoom2),]
+
+#subset the lasts
+rsq_means_all_n12_zoom_last_subet2<- rsq_means_all_n12_zoom_last2[sample(nrow(rsq_means_all_n12_zoom_last2), 8000),]
+rsq_means_C1_zoom_last_subet2<- rsq_means_C1_zoom_last2[sample(nrow(rsq_means_C1_zoom_last2), 8000),]
+rsq_means_C2_zoom_last_subet2<- rsq_means_C2_zoom_last2[sample(nrow(rsq_means_C2_zoom_last2), 8000),]
+rsq_means_C3_zoom_last_subet2<- rsq_means_C3_zoom_last2[sample(nrow(rsq_means_C3_zoom_last2), 8000),]
+
+#bind first and last
+rsq_means_all_n12_zoom_all2<- rbind(rsq_means_all_n12_zoom_first2, rsq_means_all_n12_zoom_last_subet2)
+rsq_means_all_C1_zoom_all2<- rbind(rsq_means_C1_zoom_first2, rsq_means_C1_zoom_last_subet2)
+rsq_means_all_C2_zoom_all2<- rbind(rsq_means_C2_zoom_first2, rsq_means_C2_zoom_last_subet2)
+rsq_means_all_C3_zoom_all2<- rbind(rsq_means_C3_zoom_first2, rsq_means_C3_zoom_last_subet2)
+
+#bind
+rsq_means_grand_zoom2<- data.frame(rbind(rsq_means_all_n12_zoom_all2,
+                                         rsq_means_all_C1_zoom_all2,
+                                         rsq_means_all_C2_zoom_all2,
+                                         rsq_means_all_C3_zoom_all2))
 
 
 #plot
-sp_zoom2<- ggplot(data=rsq_means_grand_zoom,aes(x=dist,y=rsq.mean))+
-  geom_line(data=rsq_means_grand_zoom, aes(color=Clade),size=0.1,alpha=0.9)+
+sp_zoom2<- ggplot(data=rsq_means_grand_zoom2,aes(x=dist,y=rsq.mean))+
+  geom_line(data=rsq_means_grand_zoom2, aes(color=Clade),size=0.15,alpha=0.9)+
 #  geom_smooth(aes(color = Clade), show.legend = FALSE) +
 #  geom_smooth(aes(color = Clade), se=FALSE) +
-  labs(x="Distance (BP) log scale",y=expression(LD~(r^{2})))+
+  labs(x="Distance (log BP)",y=expression(LD~(r^{2})))+
   theme_bw()
 zoom_print2<- sp_zoom2 + scale_color_manual(values=myCol) + 
   #add lines to indicate the point at which each Clade is half decayed
@@ -233,4 +281,4 @@ p2<-ggarrange(all_print, zoom_print,
               #labels = c("", ""),
               ncol = 2, nrow = 4)
 #p2
-ggsave("LD_decay_at_n12_20000pts.pdf",p2, width=9, height=7, units="in")
+ggsave("LD_decay_at_n12_10000pts.pdf",p2, width=9, height=7, units="in")
