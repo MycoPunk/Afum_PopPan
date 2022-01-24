@@ -1,12 +1,13 @@
-##this script runs population stats on a vcf file and population defined previously using DAPCA
-##Last updated 10.Nov.2021
+##this script runs population stats on a vcf file and populations defined previously using DAPC
+#note, unless you're going to subset the data, you probably want to run this on the cluster w/ highmem.
+##Last updated 24.Jan.2022
 
 ##set wd
-setwd("")
+#setwd("")
 
 ##load libraries
 library("poppr")
-library("ape") # To visualize the tree using the "nj" function
+library("ape")
 library("magrittr")
 library("adegenet")
 library("reshape")
@@ -20,52 +21,68 @@ sessionInfo() #hierfstat_0.5-7 = cran version #hierfstat_0.5-9 = github version
 set.seed(666)
 
 ##read in data
-vcf<- read.vcfR("Pop_for_pan_260.All.SNP.combined_selected.vcf.gz") #W/o TE's and w 260 strains
-Afum_grp<-read.delim("grp_temp.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE)
-#name_map<-read.delim("clade_map_K3_20Jan2021.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = TRUE)
-#Afum_grp<- data.frame(cbind(strain = name_map$name_pop_genome, pop = name_map$clade))
+vcf<- read.vcfR("Pop_for_pan_260.v2.All.SNP.combined_selected.NO.TE.vcf.gz") #W/o TE's and w 260 strains
+Afum_grp<-read.delim("clade_map_K3_3Jan2022.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = TRUE)
 
+#check that all sample names are retained and in the right order
+setdiff(colnames(vcf@gt)[-1], Afum_grp$name_pop_genome_new)# character(0) = TRUE - all the names are correct and all the samples are in there
+all(colnames(vcf@gt)[-1] == Afum_grp$name_pop_genome_new) # FALSE - samples are not in the correct order
+
+#put samples in the right order (to match vcf order)
+to_be_ordered_strata<- as.data.frame(cbind(Afum_grp$name_pop_genome_new, Afum_grp$clade))
+sort_on<- as.data.frame(colnames(vcf@gt)[-1])
+ordered_strata<- to_be_ordered_strata[order(match(to_be_ordered_strata[,1],sort_on[,1])),]
+
+#check that it's in order now
+all(colnames(vcf@gt)[-1] == ordered_strata$V1) # TRUE - pop now ordered to match vcf. 
 
 ##Convert to genID object
-genind_ob<- vcfR2genind(vcf, pop = Afum_grp$pop, ploidy = 1)
+genind_ob<- vcfR2genind(vcf, ploidy = 1)
 
 #set pop as strata
+colnames(ordered_strata)<- c("strain", "pop")
 strata(genind_ob) #NULL
-strata(genind_ob)<-Afum_grp
-strata(genind_ob)
+strata(genind_ob)<-ordered_strata
+strata(genind_ob) # now set to clade
 
-##Create hierfstat object
+#check pop specifically 
+head(pop(genind_ob)) #nope
+setPop(genind_ob) <- ~pop
+head(pop(genind_ob)) #now set to the pop strata
+
+#clean up large vcf to free memory
+rm(vcf)
+
+#create hierfstat object
 my_genind2 <- genind2hierfstat(genind_ob) 
 
-##transform into dosage format changing all 1s to 2s for all cols except the population col
+#transform into dosage format changing all 1s to 2s for all cols except the population col
 my_genind2[,-1][my_genind2[,-1]==1] <- 2
 
 ## check for clones, and if so run clone correction
-#Get number of MLG in GO set
+#Get number of MLG in vcf
 mlg(genind_ob)
 # Number of Individuals:  260 
 # Number of MLG:  260 
 sum(strata(genind_ob) ==1)
 sum(strata(genind_ob) ==2)
 sum(strata(genind_ob) ==3)
+#looks like there are no clones - as many MLGs as there are individuals.
 
-#run clone correction
-genind_ob_cc<- clonecorrect(genind_ob, strata = ~pop, combine = FALSE)
-mlg(genind_ob_cc)
+#this will run clone correction if needed (it is not here so I'm hashing it for this project)
+#genind_ob_cc<- clonecorrect(genind_ob, strata = ~pop, combine = FALSE)
+#mlg(genind_ob_cc)
 
-sum(strata(genind_ob_cc) ==1)
-sum(strata(genind_ob_cc) ==2)
-sum(strata(genind_ob_cc) ==3)
-# Number of Individuals:  260 
-# Number of MLG:  260 
-#= No clones in the dataset
+#sum(strata(genind_ob_cc) ==1)
+#sum(strata(genind_ob_cc) ==2)
+#sum(strata(genind_ob_cc) ==3)
 
-#double using the explicit output generated from calling clonecorrect on a genclone object
-genind_clone_ob<- as.genclone(genind_ob, mlgclass = TRUE)
-mlg(genind_clone_ob)
-genind_clone_ob_cc<- clonecorrect(genind_clone_ob, strata = ~pop, combine = FALSE)
-genind_clone_ob_cc
-#nope - there are no clones in this set. 
+
+#double check using the explicit output generated from calling clonecorrect on a genclone object
+#genind_clone_ob<- as.genclone(genind_ob, mlgclass = TRUE)
+#mlg(genind_clone_ob)
+#genind_clone_ob_cc<- clonecorrect(genind_clone_ob, strata = ~pop, combine = FALSE)#
+#genind_clone_ob_cc 
 
 ##get Fst values for ea pop and overall
 fst.dosage(my_genind2[,-1],pop=my_genind2$pop)
@@ -74,8 +91,8 @@ fst.dosage(my_genind2[,-1],pop=my_genind2$pop)
 
 ##get confidence interval for ea. population 
 
-#Fst_ea<- betas(my_genind_dip_w_pop,nboot=101,lim=c(0.025,0.975),betaijT=FALSE)
-#Fst_ea
+Fst_ea<- betas(my_genind2,nboot=101,lim=c(0.025,0.975),betaijT=FALSE)
+Fst_ea
 
 
 ##diplodize the haploid data by changing 0 to 11 and 2 to 22
@@ -136,7 +153,8 @@ amova_of_genid2<- poppr.amova(genind_ob,
 amova_of_genid2
 
 #test for significance in population differentiation
-genid2signif<- ade4::randtest(amova_of_genid2, nrepet = 999, alter ="two-sided")
+genid2signif<- ade4::randtest(amova_of_genid2, nrepet = 999)
+
 #difference is significant
 
 
@@ -146,6 +164,7 @@ genid2signif<- ade4::randtest(amova_of_genid2, nrepet = 999, alter ="two-sided")
 #in poppr
 montab <- mlg.table(genind_ob, strata = ~genind_ob.pop)
 monstat <- diversity_stats(montab)
+monstat
 ci_monstat_T<- diversity_ci(genind_ob, n = 1000, rarefy = T, 
                             raw = FALSE, ci = 95, plot = TRUE,
                             center = TRUE, n.rare = 2)
