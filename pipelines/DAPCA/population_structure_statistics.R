@@ -1,6 +1,6 @@
 ##this script runs population stats on a vcf file and populations defined previously using DAPC
 #note, unless you're going to subset the data, you probably want to run this on the cluster w/ highmem.
-##Last updated 24.Jan.2022
+##Last updated 25.Jan.2022
 
 ##set wd
 #setwd("")
