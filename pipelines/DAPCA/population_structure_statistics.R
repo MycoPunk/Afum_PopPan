@@ -86,50 +86,16 @@ sum(strata(genind_ob) ==3)
 
 ##get Fst values for ea pop and overall
 fst.dosage(my_genind2[,-1],pop=my_genind2$pop)
-#2         1         3       All 
-#0.8045510 0.7775002 0.8718761 0.8179758 
+#        2         1         3       All 
+#0.8252919 0.7669710 0.8794938 0.8239189 
 
-##get confidence interval for ea. population 
-
-Fst_ea<- betas(my_genind2,nboot=101,lim=c(0.025,0.975),betaijT=FALSE)
-Fst_ea
-
-
-##diplodize the haploid data by changing 0 to 11 and 2 to 22
-#make copy
-#predip<- my_genind2
-#change 0 to 11
-#predip[,-1][predip[,-1]==0] <- 11
-#change 2 to 22
-#predip[,-1][predip[,-1]==2] <- 22
-
-
-#using dosage format to calculate betas
-#dosage_betas<- beta.dosage(my_genind2[,-1],inb=FALSE,Mb=FALSE)
-#dosage_betas
-
-##Calculate between population Fst values and confidence intervals 
-
-#pairwise Fst CIs - note - you don't want to do this if your population sizes are unequal. You want to use dosage format.
-#ci_pairwiseFst_boot1000_dipT<- boot.ppfst(predip, nboot=1000, quant=c(0.025,0.975), diploid=TRUE)
-
-#ci_pairwiseFst$ll
-
-#ci_pairwiseFst$ul
-
-#to calculate pairwise fst note - you don't want to do this if your population sizes are unequal. You want to use dosage format.
-#pairWC<- genet.dist(predip, diploid=F, method = "WC84") #pairwise.WCfst
-
-
-
-#in dosage format
+##get pairwise Fst values
 pairWC_dos <- fs.dosage(my_genind2[,-1], pop = my_genind2[,1])
 pairWC_dos$Fst2x2
-#2         1         3
-#2        NA 0.5768640 0.8709889
-#1 0.5768640        NA 0.8599834
-#3 0.8709889 0.8599834        NA
-
+#          2         1         3
+#2        NA 0.5308424 0.8873124
+#1 0.5308424        NA 0.8592142
+#3 0.8873124 0.8592142        NA
 
 
 ##AMOVA to calculate pairwise sequence divergence
@@ -152,25 +118,18 @@ amova_of_genid2<- poppr.amova(genind_ob,
 
 amova_of_genid2
 
+#$componentsofcovariance
+#                               Sigma         %
+#Variations  Between samples 45009.85  69.79054
+#Variations  Within samples  19482.91  30.20946
+#Total variations            64492.76 100.00000
+
+#$statphi
+#                        Phi
+#Phi-samples-total 0.6979054
+
+
 #test for significance in population differentiation
 genid2signif<- ade4::randtest(amova_of_genid2, nrepet = 999)
-
+genid2signif
 #difference is significant
-
-
-
-###calculate total nucleotide diversity 
-
-#in poppr
-montab <- mlg.table(genind_ob, strata = ~genind_ob.pop)
-monstat <- diversity_stats(montab)
-monstat
-ci_monstat_T<- diversity_ci(genind_ob, n = 1000, rarefy = T, 
-                            raw = FALSE, ci = 95, plot = TRUE,
-                            center = TRUE, n.rare = 2)
-ci_monstat_T
-
-#produces no confidence intervals
-ci_monstat_F<- diversity_ci(genind_ob, n = 10000, rarefy = FALSE, 
-                            raw = TRUE, ci = 95, n.boot = 15, plot = TRUE, center = TRUE)
-ci_monstat_F
