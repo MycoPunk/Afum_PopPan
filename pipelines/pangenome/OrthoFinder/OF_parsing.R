@@ -1,5 +1,5 @@
 #A fum pan genome analysis, using proteins clustered by Ortho Finder results
-#last updated: 6.Dec.2021
+#last updated: 30.Jan.2022
 
 #set packages 
 library(data.table)
@@ -18,7 +18,7 @@ library(phonTools)
 library(vegan)
 packageVersion("vegan") 
 
-setwd("~/Desktop/Project_Afum_pangenome_2/")
+setwd("~/Desktop/Project_Afum_pangenome_3/")
 OF.gene_counts<-as.data.frame(fread("Orthogroups.GeneCount.tsv")) 
 OF.gene_families<-as.data.frame(fread("Orthogroups.tsv")) 
 OF.unassigned<- as.data.frame(fread("Orthogroups_UnassignedGenes.tsv")) #this is where your singletons live
@@ -48,10 +48,6 @@ strain_names<- names(strains_only)
 ngenomes<- length(unique(strain_names)) 
 ngenomes
 #260
-
-
-#print to cross ref for tree building
-#write.table(strain_names, "strain_names_27Sep2021.txt", sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 
 #add number_genomes column to get totals
 #first replace blank calls with NAs
@@ -235,12 +231,15 @@ mean(accessory_by_strain$totals)
 
 
 #fix names so that they match 
-name_map<-read.delim("clade_map_K3_20Jan2021.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = TRUE)
+#name_map<-read.delim("clade_map_K3_20Jan2021.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = TRUE)
+name_map<-read.delim("clade_map_K3_3Jan2022.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = TRUE)
 
-row.names(accessory_by_strain) <- name_map$name_pop_genome[match(row.names(accessory_by_strain), name_map$OF_name)]
+
+row.names(accessory_by_strain) <- name_map$name_to_use_in_paper[match(row.names(accessory_by_strain), name_map$OF_name)]
 accessory_by_strain$pop_name<- row.names(accessory_by_strain)
 #remove "DMC2" for graphing 
-accessory_by_strain$pop_name<- sapply(accessory_by_strain$pop_name, gsub, pattern = "DMC2_", replacement = "")
+#accessory_by_strain$pop_name<- sapply(accessory_by_strain$pop_name, gsub, pattern = "DMC2_", replacement = "")
+
 
 #graph accessory genome size by strain
 p<- accessory_by_strain %>%
@@ -258,7 +257,7 @@ p
 #        axis.text.x = element_text(size = 2, angle=90, hjust=1), legend.position = "none")+
 #  facet_zoom(ylim = c(min(accessory_by_strain$totals), max(accessory_by_strain$totals)), zoom.data = ifelse(a <= 6000,  FALSE))
 
-#ggsave("accessory.pdf",p, width=6.9, height=3, units="in")
+ggsave("accessory.pdf",p, width=6.9, height=3, units="in")
 
 
 
@@ -284,7 +283,7 @@ singletons_only_by_strain<- singletons_only_by_strain[order(singletons_only_by_s
 
 
 #fix names
-row.names(singletons_only_by_strain) <- name_map$name_pop_genome[match(row.names(singletons_only_by_strain), name_map$OF_name)]
+row.names(singletons_only_by_strain) <- name_map$name_to_use_in_paper[match(row.names(singletons_only_by_strain), name_map$OF_name)]
 singletons_only_by_strain$pop_name<- row.names(singletons_only_by_strain)
 #remove "DMC2" for graphing 
 singletons_only_by_strain$pop_name<- sapply(singletons_only_by_strain$pop_name, gsub, pattern = "DMC2_", replacement = "")
@@ -312,13 +311,30 @@ p
 ###graph presence / absence matrix on to big tree
 
 #tree with 260 strains
-tree_me <- read.tree("Afum_260_iq_tree_newick.tre")
+tree_me <- read.tree("Afum_260_iq_tree_newick_v2.tre")
+#remove the reference from the tree:
+tree_me<- drop.tip(tree_me, "Af293-REF", trim.internal = TRUE, subtree = FALSE,
+                root.edge = 0, rooted = is.rooted(tree_me), collapse.singles = TRUE,
+                interactive = FALSE)
+#root tree
+tree_me<- root(tree_me, node = 505, resolve.root = TRUE,
+            interactive = FALSE, edgelabel = FALSE)
 
+#attach the clade annotations 
+singletons_only_by_strain$clade<- name_map$clade[match(row.names(singletons_only_by_strain), name_map$name_to_use_in_paper)]
+accessory_by_strain$clade<- name_map$clade[match(row.names(accessory_by_strain), name_map$name_to_use_in_paper)]
 
-##use mapping file to rename the strains to match the way they appear in the tree
-#attach the clade annotations - note- update this later when you designate clades
-singletons_only_by_strain$clade<- name_map$clade[match(row.names(singletons_only_by_strain), name_map$name_pop_genome)]
-accessory_by_strain$clade<- name_map$clade[match(row.names(accessory_by_strain), name_map$name_pop_genome)]
+##use mapping file to rename the tree branches to match the way appear in by singleton and accessory files
+#rename tips to represent clades
+#function to rename tips
+rename.tips <- function(phy, old_names, new_names) {
+  mpos <- match(old_names,phy$tip.label)
+  phy$tip.label[mpos] <- new_names
+  return(phy)
+}
+
+tree_me_rename<- rename.tips(tree_me, old_names = name_map$name_pop_genome_new, new_names = name_map$name_to_use_in_paper)
+tree_me_rename$tip.label
 
 #get averages by clade
 singeltons_clade1<- singletons_only_by_strain[singletons_only_by_strain$clade == "1",]
@@ -352,29 +368,14 @@ permKS(accessory_by_strain$clade ~ accessory_by_strain$totals, alternative="two.
 
 
 ##plot tree
-#match tree (for the couple sp. that are  miss-named)
-tree_me$tip.label[tree_me$tip.label=="F18149"] <- "F18149-JCVI"
-tree_me$tip.label[tree_me$tip.label=="Afu_343-P/11"] <- "Afu_343-P-11"
-tree_me$tip.label[tree_me$tip.label=="AFIS1435CDC_6"] <- "AFIS1435_CDC_6"
-
-
-#remove the reference from the tree:
-tree_me<- drop.tip(tree_me, "Af293-REF", trim.internal = TRUE, subtree = FALSE,
-                   root.edge = 0, rooted = is.rooted(tree_me), collapse.singles = TRUE,
-                   interactive = FALSE)
-#root tree based on small outgroup tree (at node 266)
-tree_me<- root(tree_me, node = 266, resolve.root = FALSE,
-                      interactive = FALSE, edgelabel = FALSE)
-
-
 #split by clade
 grA_me<- split(row.names(accessory_by_strain), accessory_by_strain$clade)
 
 #split by mat type
-grA_me_mat<- split(name_map$name_pop_genome, name_map$MAT_type)
+grA_me_mat<- split(name_map$name_to_use_in_paper, name_map$MAT_type)
 
 #set colors by group for clade
-tree_grA_me <- ggtree::groupOTU(tree_me, grA_me)
+tree_grA_me <- ggtree::groupOTU(tree_me_rename, grA_me)
 str(tree_grA_me)
 levels(attributes(tree_grA_me)$group) 
 levels(attributes(tree_grA_me)$group)[1] <- "1"
@@ -396,7 +397,7 @@ scales::show_col(my_cols_me); my_cols_me
 
 
 ###set colors by group for mat type 
-tree_grA_me_mat <- ggtree::groupOTU(tree_me, grA_me_mat)
+tree_grA_me_mat <- ggtree::groupOTU(tree_me_rename, grA_me_mat)
 str(tree_grA_me_mat)
 tree_grA_me_mat2 <- ggtree::groupOTU(tree_grA_me_mat, grA_me)
 str(tree_grA_me_mat2)
@@ -415,21 +416,7 @@ scales::show_col(my_cols_me_mat); my_cols_me_mat
 
 #optional ultrametric tree 
 #tree_grA_me_ultra<- force.ultrametric(tree_grA_me)
-
-#root tree at node#267, based on small tree with outgroup 
-#plotTree(tree_grA_me,node.numbers=T)
-#plot(tree_grA_me, use.edge.length=TRUE, cex = .2, label.offset = 0)
-#nodelabels(cex=.5)
-#tree_to_map_on<- root(tree_grA_me, node = 267, resolve.root = FALSE,
-#     interactive = FALSE, edgelabel = FALSE)
-#plotTree(tree_to_map_on, node.numbers=F, use.edge.length=TRUE, cex = .2, label.offset = 0)
-
-#tree_to_map_on2<- 
-#  flip(tree_to_map_on, 266, 325)+ geom_tiplab(size = 0, align = TRUE, linesize = .25, linetype = 3)
-
   
-
-
 
 #simple plot
 tree_plot_me <- 
@@ -437,7 +424,7 @@ tree_plot_me <-
          # color by group attribute, check str(tree_grA_me)
          mapping = aes(color = group), 
          layout  = 'circular', 
-         #layout  = 'rectangular', 
+        # layout  = 'rectangular', 
          branch.length = 'none', 
          #  geom_treescale(x=3, y=NULL, color = "white") +
          # set line thickness
@@ -477,10 +464,13 @@ tree_plot_me_mat <-
 tree_plot_me_mat + geom_tiplab(size = 1, align = TRUE, linesize = 0, linetype = 0) +
   geom_tippoint(aes(x=x+16, color=group), size=.50)
 
+name_map_sm<- name_map[,c("name_to_use_in_paper", "MAT_type")]
+
 #combine annotations for clade and MAT type into one tree
 pi<- tree_plot_me + geom_tiplab(size = .6, align = TRUE, linesize = .20, linetype = NA) 
-p <- pi %<+% name_map + geom_tippoint(aes(x=x+14,color=MAT_type), size=.30) + scale_color_manual(values=c("#56326E", "#ED7F6F","#ABA778", "#BEBDBD", "#404041", "#D4494E"))
+p <- pi %<+% name_map_sm + geom_tippoint(aes(x=x+14,color=MAT_type), size=.30) + scale_color_manual(values=c("#56326E", "#ED7F6F","#ABA778", "#BEBDBD", "#404041", "#D4494E"))
 plot(p)
+
 
 #theme(legend.title=element_text(size=10), # The title of legend 
 #      legend.text=element_text(size=7))+
@@ -594,14 +584,99 @@ tree_all_data<- tree_bars_me + geom_tiplab(size = .6, align = TRUE, linesize = .
 tree_all_data 
 
 #ggsave(file="pan_genome_tree_w_bars.pdf",device="pdf")
-#fix names in big tree 
-#remove "DMC2" for graphing 
-tree_all_data_test<- tree_all_data 
 
-tree_all_data_test$data$label<- gsub(pattern = "DMC2_", replacement = "", tree_all_data_test$data$label)
+#add MAT1-2-4 to this tree?
+OF.gene_families<-as.data.frame(fread("Orthogroups.tsv")) 
+OF.unassigned<- as.data.frame(fread("Orthogroups_UnassignedGenes.tsv")) #this is where your singletons live
+OFtoAfu<- as.data.frame(fread("OF_blastP_results_filtered.txt", header = FALSE)) #this is the OG to Afu designations
+colnames(OFtoAfu)<- c("Afu_name", "OG_name")
+#combine OF families with singletons
+OF.gene_families_all<- rbind(OF.gene_families, OF.unassigned)
+#fix names
+names(OF.gene_families_all)<- sapply(names(OF.gene_families_all), gsub, pattern = "Aspergillus_fumigatus_", replacement = "" )
+names(OF.gene_families_all)<- sapply(names(OF.gene_families_all), gsub, pattern = ".proteins", replacement = "" )
+#names of cols to exclude
+cols_to_exclude<- "Orthogroup"
+strains_only<- OF.gene_families_all[,!names(OF.gene_families_all) %in% cols_to_exclude]
+strain_names<- names(strains_only)
+#first replace blank calls with NAs
+strains_only<- apply(strains_only, 2, function(x) gsub("^$|^ $", NA, x))
+OF.gene_families_all$number_genomes<- rowSums(!is.na(strains_only)) #cols that are not blank
+#replace blanks with NAs for all
+OF.gene_families_all<- data.frame(apply(OF.gene_families_all, 2, function(x) gsub("^$|^ $", NA, x)))
+#create 0/1 df 
+gene_fam_by_strain_w_anno<-as.data.frame(OF.gene_families_all[,c(2:(ncol(OF.gene_families_all)-1))]) 
+#fix X introduced in names
+names(gene_fam_by_strain_w_anno)<- sapply(names(gene_fam_by_strain_w_anno), gsub, pattern = "X", replacement = "" )
+##make binary (if gene = 1, if not = 0)
+#replace all NAs with 0s
+gene_fam_by_strain_w_anno[is.na(gene_fam_by_strain_w_anno)] <- 0
+#fill in ones
+gene_fam_by_strain_w_anno_ones<- as.data.frame(replace(gene_fam_by_strain_w_anno[,1:ncol(gene_fam_by_strain_w_anno)], gene_fam_by_strain_w_anno!=0, 1))
+#change to numeric
+gene_fam_by_strain_w_anno_ones_num <- mutate_all(gene_fam_by_strain_w_anno_ones, function(x) as.numeric(as.character(x)))
+#bind annotations
+gene_fam_by_strain_w_anno_ones_num2<- cbind(OF.gene_families_all = OF.gene_families_all$Orthogroup, gene_fam_by_strain_w_anno_ones_num)
+#bind Afu annotations, NA if the OG is not in Afu genes.
+#load data from OG to Afu BLAST search
+OFtoAfu<- as.data.frame(fread("OF_blastP_results_filtered.txt", header = FALSE)) #this is the OG to Afu designations
+#assign col names
+fmt6_names<- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore")
+colnames(OFtoAfu)<- fmt6_names
+#attach Afu annotations
+colnames(gene_fam_by_strain_w_anno_ones_num2)[1] <- "OF_gene_fam"
+gene_fam_by_strain_w_anno_ones_num2$Af293_reference_gene_name<- OFtoAfu$qseqid[match(gene_fam_by_strain_w_anno_ones_num2$OF_gene_fam, OFtoAfu$sseqid)]
+#subset large df to only Afu3g06160 (MAT1-2-4)
+MAT1.2.4<- gene_fam_by_strain_w_anno_ones_num2[gene_fam_by_strain_w_anno_ones_num2$Af293_reference_gene_name %in% "Afu3g06160",]
+#subset to only counts
+all_vars<- MAT1.2.4[,2:261]
+#change to presence / absence
+all_vars_presence<- data.frame(lapply(all_vars, gsub, pattern = "1", replacement = "present"))
+all_vars_presence_absence<- data.frame(lapply(all_vars_presence, gsub, pattern = "0", replacement = "absent"))
+#fix col names X's introduced in last step because R likes to make life difficult
+colnames(all_vars_presence_absence)<- colnames(all_vars)
+#add rowames
+rownames(all_vars_presence_absence)<- MAT1.2.4$Af293_reference_gene_name
+#transpose for graphing
+all_vars_presence_absence_t<- data.frame(t(all_vars_presence_absence))
+#fix names to match OG names
+row.names(all_vars_presence_absence_t) <- name_map$name_to_use_in_paper[match(row.names(all_vars_presence_absence_t), name_map$OF_name)]
 
-tree_all_data_test
-#ggsave(file="pan_genome_tree_w_bars_fixed_names.pdf",device="pdf")
+#get counts
+rownames(all_vars)<- MAT1.2.4$Af293_reference_gene_name
+rowSums(all_vars) #there are 116 strains w/ MAT-1-2-4
+
+
+#plot tree with all annotation
+tree_plot <-  gheatmap(tree_bars_me, 
+                       all_vars_presence_absence_t,
+                       offset=15, width=0.02, low="white", high="black", 
+                       colnames = F, 
+                       #colnames_angle = 45,
+                       #colnames_position = "top",
+                       #font.size = 1,
+                       #colnames_offset_y = -6,
+                       #colnames_offset_x = .05,
+                       color="white") +
+  scale_fill_manual(values=c("white", "black")) 
+
+tree_all_data<- tree_plot + geom_tiplab(size = .09, align = TRUE, linesize = .20, linetype = NA)+ guides(fill = guide_legend(ncol = 3))+
+  theme(legend.title=element_text(size=10), # The title of legend 
+        legend.text=element_text(size=7))+
+  guides(color = guide_legend(override.aes = list(linetype = c(1, 1, 1, 0, 0, 0), size = c(1,1,1,2,2,2), shape = c(NA, NA,NA, 16, 16, 16)), title = "", nrow = 3)) 
+
+tree_all_data 
+
+ggsave("pan_genome_tree_w_bars_and_mat1-2-4.pdf", tree_all_data, width=22, height=22, 
+       device = "pdf", units = "cm")
+
+
+sum(name_map$MAT_type == "MAT1") #144
+sum(name_map$MAT_type == "MAT2") #105
+sum(name_map$MAT_type == "unknown") #11
+######
+
+
 
 
 ###are there unique gene families (or unique losses) by clade?
@@ -804,9 +879,9 @@ dim(how_many) #28
 
 
 #Print all exclusive gene fams for sup table
-write.table(exclusive_to_clade1, "exclusive_to_clade1_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
-write.table(exclusive_to_clade2, "exclusive_to_clade2_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
-write.table(exclusive_to_clade3, "exclusive_to_clade3_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+#write.table(exclusive_to_clade1, "exclusive_to_clade1_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+#write.table(exclusive_to_clade2, "exclusive_to_clade2_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+#write.table(exclusive_to_clade3, "exclusive_to_clade3_all.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
 
 ##do the same for losses
@@ -1003,23 +1078,6 @@ all
 
 #ggsave("distribution_of_losses_by_clade.pdf", all, width=20, height=20, 
 #       device = "pdf", units = "cm")
-
-
-
-
-
-##############################
-#write to file for analysis in bash
-just_singeltons<- gene_fam_by_strain_w_anno_ones_num2[rowSums(gene_fam_by_strain_w_anno_ones_num2[,5:ncol(gene_fam_by_strain_w_anno_ones_num2)]) == 1,]
-just_core<- gene_fam_by_strain_w_anno_ones_num2[rowSums(gene_fam_by_strain_w_anno_ones_num2[,5:ncol(gene_fam_by_strain_w_anno_ones_num2)]) >= 248,]
-just_acessory_1<- gene_fam_by_strain_w_anno_ones_num2[rowSums(gene_fam_by_strain_w_anno_ones_num2[,5:ncol(gene_fam_by_strain_w_anno_ones_num2)]) > 1,]
-just_acessory<- just_acessory_1[rowSums(just_acessory_1[,5:ncol(just_acessory_1)]) < 248,]
-
-#write.table(just_singeltons, "acessory_gene_numbers.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
-#write.table(just_core, "core_gene_numbers.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
-#write.table(just_acessory, "singleton_gene_numbers.txt", sep="\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
-
-##############################
 
 
 #is genome open or closed?
