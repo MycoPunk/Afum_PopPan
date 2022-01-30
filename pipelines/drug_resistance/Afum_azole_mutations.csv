@@ -11,7 +11,7 @@ cyp51A,"Itraconazole, Posaconazole, variable Voriconazole resistance",Afu4g06890
 cyp51A,Voriconazole,Afu4g06890,14‐alpha sterol demethylase,,,G448S,Gly448Ser,Gly448,10.1128/JCM.00329-12,MARDy
 cyp51A,"Itraconazole, Voriconazole, Posaconazole",Afu4g06890,14‐alpha sterol demethylase,,,Y431C,Tyr431Cys,Try431,10.3201/eid1507.090043,MARDy
 cyp51A,"Itraconazole, Voriconazole, Posaconazole",Afu4g06890,14‐alpha sterol demethylase,,,G343C,Gly434Cys,Gly434,10.3201/eid1507.090043,MARDy
-cyp51A,"Itraconazole, Posaconazole",Afu4g06890,14‐alpha sterol demethylase,,,P216L,Pro216Leu,Pro116,10.3201/eid1507.090043,MARDy
+cyp51A,"Itraconazole, Posaconazole",Afu4g06890,14‐alpha sterol demethylase,,,P216L,Pro216Leu,Pro216,10.3201/eid1507.090043,MARDy
 cyp51A,"Itraconazole, Posaconazole",Afu4g06890,14‐alpha sterol demethylase,,,F46Y/M172V/N248T/D255E ,Phe46Tyr|Met172Val|Asn246Thr|Asp255Glu|Glu427Lys,Phe46|Met172|Asn246|Asp255|Glu427,10.3201/eid1507.090043,MARDy
 cyp51A,Itraconazole,Afu4g06890,14‐alpha sterol demethylase,,,M236[K/T/V],Met236Lys|Met236Thr|Met236Val,Met236,10.1128/AAC.47.3.1120-1124.2003,lit review
 cyp51A,Itraconazole,Afu4g06890,14‐alpha sterol demethylase,,,G432S,Gly432Ser,Gly432,10.1093/jac/dkq450,lit review
