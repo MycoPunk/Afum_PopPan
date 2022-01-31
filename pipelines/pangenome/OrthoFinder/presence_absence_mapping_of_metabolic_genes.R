@@ -1,10 +1,10 @@
-#mapping of Afu (reference Af293) annotated genes to Orthofinder defined gene families was conducted using BLASTP
-#GENE lists of Af293 genes falling under GO terms of interest were downloaded from FungiDB, using all GO terms available for:
+#mapping of Afu (reference Af293) annotated genes to Orthofinder defined OGs was conducted using BLASTP
+#GENE lists were procured from FungiDB, using all GO terms available for:
 #organonitrogen compound metabolic process (GO: 1901564)
 #carbohydrate metabolic process (GO: 0005975)
 #organophosphate biosynthetic process (GO: 0090407)
 
-#last updated: 6.Dec.2021
+#last updated: 31.Jan.2022
 
 #set packages 
 library(data.table)
@@ -27,18 +27,18 @@ library(wesanderson)
 library(dplyr)
 
 #set wd
-setwd("~/Desktop/Project_Afum_pangenome_2/")
+setwd("~/Desktop/Project_Afum_pangenome_3/")
 
-#load data files - hash as needed - the rest of the script does not need editing, except to set the number of top hits to display in the tree (if there are too many results to easily visualize)
-#Vir_genes<- as.data.frame(fread("GENES_carbohydrate_metabolic_process.csv", header = TRUE)) #this is the gli gene mapping file
-#Vir_genes<- as.data.frame(fread("GENES_organonitrogen_metabolic_process.csv", header = TRUE)) #this is the gli gene mapping file
-Vir_genes<- as.data.frame(fread("GENES_organophosphate_metabolic_process.csv", header = TRUE)) #this is the gli gene mapping file
+#load data files - hash as needed - the rest of the script does not need editing, except to set the number of top hits to display in the tree (if there are too many results to easily visualize, which is changed at line 366)
+#GOI_genes<- as.data.frame(fread("GENES_carbohydrate_metabolic_process.csv", header = TRUE)) 
+#GOI_genes<- as.data.frame(fread("GENES_organonitrogen_metabolic_process.csv", header = TRUE))
+GOI_genes<- as.data.frame(fread("GENES_organophosphate_metabolic_process.csv", header = TRUE)) 
 
 OF.gene_families<-as.data.frame(fread("Orthogroups.tsv")) 
 OF.unassigned<- as.data.frame(fread("Orthogroups_UnassignedGenes.tsv")) #this is where your singletons live
 OFtoAfu<- as.data.frame(fread("OF_blastP_results_filtered.txt", header = FALSE)) #this is the OG to Afu designations
 colnames(OFtoAfu)<- c("Afu_name", "OG_name")
-Afum_grp<-read.delim("clade_map_K3_20Jan2021.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = TRUE)
+Afum_grp<-read.delim("clade_map_K3_3Jan2022.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = TRUE)
 
 #combine OF families with singletons
 OF.gene_families_all<- rbind(OF.gene_families, OF.unassigned)
@@ -90,30 +90,36 @@ colnames(OFtoAfu)<- fmt6_names
 colnames(gene_fam_by_strain_w_anno_ones_num2)[1] <- "OF_gene_fam"
 gene_fam_by_strain_w_anno_ones_num2$Af293_reference_gene_name<- OFtoAfu$qseqid[match(gene_fam_by_strain_w_anno_ones_num2$OF_gene_fam, OFtoAfu$sseqid)]
 
-#subset large df to only Afu genes in the gli cluster
-Vir_genes_all_counts<- gene_fam_by_strain_w_anno_ones_num2[gene_fam_by_strain_w_anno_ones_num2$Af293_reference_gene_name %in% Vir_genes$Af293_gene_name,]
+#subset large df to only Afu genes in the target gene list
+GOI_genes_all_counts<- gene_fam_by_strain_w_anno_ones_num2[gene_fam_by_strain_w_anno_ones_num2$Af293_reference_gene_name %in% GOI_genes$Af293_gene_name,]
 
-setdiff(Vir_genes$Af293_gene_name, Vir_genes_all_counts$Af293_reference_gene_name)
+setdiff(GOI_genes$Af293_gene_name, GOI_genes_all_counts$Af293_reference_gene_name)
 
 #make presence / absence graph of abundance 
-#Vir_genes_all_counts
-
 #load tree data
-tree <- read.tree("Afum_260_iq_tree_newick.tre")
+tree <- read.tree("Afum_260_iq_tree_newick_v2.tre")
+
 #remove the reference from the tree:
 tree<- drop.tip(tree, "Af293-REF", trim.internal = TRUE, subtree = FALSE,
                 root.edge = 0, rooted = is.rooted(tree), collapse.singles = TRUE,
                 interactive = FALSE)
-#match tree (for the couple sp. that are  miss-named)
-tree$tip.label[tree$tip.label=="F18149"] <- "F18149-JCVI"
-tree$tip.label[tree$tip.label=="Afu_343-P/11"] <- "Afu_343-P-11"
-tree$tip.label[tree$tip.label=="AFIS1435CDC_6"] <- "AFIS1435_CDC_6"
-#root tree based on small outgroup tree (at node 266)
-tree<- root(tree, node = 266, resolve.root = FALSE,
+#root tree
+tree<- root(tree, node = 505, resolve.root = TRUE,
             interactive = FALSE, edgelabel = FALSE)
 
+
+#function to rename tips
+rename.tips <- function(phy, old_names, new_names) {
+  mpos <- match(old_names,phy$tip.label)
+  phy$tip.label[mpos] <- new_names
+  return(phy)
+}
+
+tree<- rename.tips(tree, old_names = Afum_grp$name_pop_genome_new, new_names = Afum_grp$name_to_use_in_paper)
+tree$tip.label
+
 #set colors by group for clade
-grA_me<- split(Afum_grp$name_pop_genome, Afum_grp$clade)
+grA_me<- split(Afum_grp$name_pop_genome_new, Afum_grp$clade)
 tree_grA_me <- ggtree::groupOTU(tree, grA_me)
 str(tree_grA_me)
 levels(attributes(tree_grA_me)$group) 
@@ -152,24 +158,24 @@ tree_plot_me <-
 tree_plot_me<- tree_plot_me +geom_tiplab(size = 0, align = TRUE, linesize = .25, linetype = 3)
 tree_plot_me
 
-#plot gli genes onto tree
+#plot GOI genes onto tree
 #subset to only counts
-all_vars<- Vir_genes_all_counts[,2:261]
+all_vars<- GOI_genes_all_counts[,2:261]
 #change to presence / absence
 all_vars_presence<- data.frame(sapply(all_vars, gsub, pattern = "1", replacement = "present"))
 all_vars_presence_absence<- data.frame(sapply(all_vars_presence, gsub, pattern = "0", replacement = "absent"))
 #fix col names X's introduced in last step because R likes to make life difficult
 colnames(all_vars_presence_absence)<- colnames(all_vars)
 #add rowames
-rownames(all_vars_presence_absence)<- Vir_genes_all_counts$Af293_reference_gene_name
+rownames(all_vars_presence_absence)<- GOI_genes_all_counts$Af293_reference_gene_name
 #transpose for graphing
 all_vars_presence_absence_t<- data.frame(t(all_vars_presence_absence))
 
 #fix names to match OG names
-row.names(all_vars_presence_absence_t) <- Afum_grp$name_pop_genome[match(row.names(all_vars_presence_absence_t), Afum_grp$OF_name)]
+row.names(all_vars_presence_absence_t) <- Afum_grp$name_to_use_in_paper[match(row.names(all_vars_presence_absence_t), Afum_grp$OF_name)]
 
 #get counts
-rownames(all_vars)<- Vir_genes_all_counts$Af293_reference_gene_name
+rownames(all_vars)<- GOI_genes_all_counts$Af293_reference_gene_name
 rowSums(all_vars)
 
 #if sums are in all, remove and don't map 
@@ -214,6 +220,8 @@ all_vars_presence_absence_t_absence<- data.frame(sapply(all_vars_presence_absenc
 #add back rownames
 rownames(all_vars_presence_absence_t_absence)<- rownames(all_vars_presence_absence_t)
 
+
+
 #change to numeric
 class(all_vars_presence_absence_t_absence[1,1])
 all_vars_presence_absence_t_absence<-as.data.frame(lapply(all_vars_presence_absence_t_absence,as.numeric))
@@ -235,10 +243,11 @@ clade_1_names<- Afum_grp[Afum_grp$clade == "1",]
 clade_2_names<- Afum_grp[Afum_grp$clade == "2",]
 clade_3_names<- Afum_grp[Afum_grp$clade == "3",]
 
-#seperate the caldes 
-clade_1<- all_vars_presence_absence_t_no_zero[rownames(all_vars_presence_absence_t_no_zero) %in% clade_1_names$name_pop_genome,]
-clade_2<- all_vars_presence_absence_t_no_zero[rownames(all_vars_presence_absence_t_no_zero) %in% clade_2_names$name_pop_genome,]
-clade_3<- all_vars_presence_absence_t_no_zero[rownames(all_vars_presence_absence_t_no_zero) %in% clade_3_names$name_pop_genome,]
+
+#separate the clades 
+clade_1<- all_vars_presence_absence_t_no_zero[rownames(all_vars_presence_absence_t_no_zero) %in% clade_1_names$name_to_use_in_paper,]
+clade_2<- all_vars_presence_absence_t_no_zero[rownames(all_vars_presence_absence_t_no_zero) %in% clade_2_names$name_to_use_in_paper,]
+clade_3<- all_vars_presence_absence_t_no_zero[rownames(all_vars_presence_absence_t_no_zero) %in% clade_3_names$name_to_use_in_paper,]
 
 #make sure these are the right size
 dim(clade_1)
@@ -289,9 +298,9 @@ p_vals_kw_sig<- all_kw_p_vals[all_kw_p_vals$p.adjust < 0.001,]
 names_of_sig_results<- rownames(p_vals_kw_sig)
 length(names_of_sig_results)
 
-#top 10
+#top x results
 p_vals_kw_sig_ordered<- p_vals_kw_sig[order(p_vals_kw_sig$p.adjust),]
-p_vals_kw_sig_top10<- p_vals_kw_sig_ordered[1:10,]
+p_vals_kw_sig_top10<- p_vals_kw_sig_ordered[1:7,]
 names_of_sig_results_top_10<- rownames(p_vals_kw_sig_top10)
 
 #####
@@ -299,6 +308,7 @@ names_of_sig_results_top_10<- rownames(p_vals_kw_sig_top10)
 
 #subset only significant results
 df.subset_and_clade <- input_ON_set[, c("clade",names_of_sig_results)]
+
 
 #as loop
 DT_loop_vals<- apply(df.subset_and_clade[,-1], 2, function(x) dunnTest(x,df.subset_and_clade[,1], method="bonferroni"))
@@ -343,22 +353,24 @@ rownames(table_for_print)<- c("Clade 1", "Clade 2", "Clade 3")
 ####
 ####### 
 
-#make figure of the 25 significantly differnt groups
+#make figure of the significantly different groups
 #get names of significant results. 
 
 names_of_sig_results<- rownames(p_vals_kw_sig)
 #subset from the main df
 #all
-#df.subset <- input_ON_set[, names_of_sig_results]
-#top ten
 df.subset <- input_ON_set[, names_of_sig_results]
+#for top x results
 
-#Scale
-test<- apply(df.subset, MARGIN = 2, FUN = function(X) (X - min(X))/diff(range(X)))
+#top x results
+#df.subset <- input_ON_set[, names_of_sig_results_top_10]
+
+#Scale if not zero one
+#scaled<- apply(df.subset, MARGIN = 2, FUN = function(X) (X - min(X))/diff(range(X)))
 
 #map these onto tree. 
 ON_tree_plot <-  gheatmap(tree_plot_me, 
-                          test,
+                          df.subset,
                           low = "white",
                           high = "black",
                           offset=0.02, width=2, 
@@ -369,8 +381,8 @@ ON_tree_plot <-  gheatmap(tree_plot_me,
                           colnames_offset_y = -6,
                           colnames_offset_x = .05,
                           color="white")
-#scale_fill_viridis_c(option="F", name="continuous\nvalue") 
-#scale_fill_viridis_c(option="F", name="normalized\nabundance") 
+#scale_fill_GOIidis_c(option="F", name="continuous\nvalue") 
+#scale_fill_GOIidis_c(option="F", name="normalized\nabundance") 
 p<- ON_tree_plot + geom_tiplab(size = .8, align = TRUE, linesize = .25, offset = 2.75, linetype = 0)
 p
-#ggsave(file="PHOS_tree_top10.pdf",device="pdf", p, width=8, height=8, units="in")
+ggsave(file="PHOS_tree_top10.pdf",device="pdf", p, width=8, height=8, units="in")
