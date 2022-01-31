@@ -1,5 +1,5 @@
 ##This is a test to look at the distribution of known resistance variants in the pop-genome data for 260 strains of A.fumigatus
-#last updated 30.Jan.2021
+#last updated 31.Jan.2021
 
 #load modules
 require(data.table)
@@ -24,7 +24,6 @@ options(stringsAsFactors = FALSE)
 ##set seed for reproducibility
 set.seed(666)
 
-
 ##read in data
 snpEff_all<-read.delim("Pop_for_pan_260.v2.snpEff.matrix.tsv", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = FALSE)
 Afum_grp<-read.delim("clade_map_K3_3Jan2022.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = TRUE)
@@ -38,6 +37,16 @@ tree<- drop.tip(tree, "Af293-REF", trim.internal = TRUE, subtree = FALSE,
 #root tree
 tree<- root(tree, node = 505, resolve.root = TRUE,
                interactive = FALSE, edgelabel = FALSE)
+
+#function to rename tips
+rename.tips <- function(phy, old_names, new_names) {
+  mpos <- match(old_names,phy$tip.label)
+  phy$tip.label[mpos] <- new_names
+  return(phy)
+}
+
+tree<- rename.tips(tree, old_names = Afum_grp$name_pop_genome_new, new_names = Afum_grp$name_to_use_in_paper)
+tree$tip.label
 
 
 ###clean the SNP data for easy processing###
@@ -55,6 +64,15 @@ dim(snpEff_all[,11:(ncol(snpEff_all) -1)])
 snpEff_no_intergenic<- snpEff_all[snpEff_all$TYPE == "missense_variant",]
 dim(snpEff_no_intergenic)
 #75,730 missence variants
+
+#rename strains so that they have the names we're going to use in the paper
+info_cols<- snpEff_no_intergenic[,1:10]
+SNP_cols<- snpEff_no_intergenic[,11:(ncol(snpEff_no_intergenic) -1)]
+colnames(SNP_cols)<- Afum_grp$name_to_use_in_paper[match(colnames(SNP_cols), Afum_grp$name_pop_genome_new)]
+snpEff_no_intergenic<- cbind(info_cols, SNP_cols)
+
+#check that the names match
+setdiff(tree$tip.label,colnames(SNP_cols))
 
 ###sep each gene of interest in the resistance_db, sep snpEff_no_intergenic into their own dfs
 #set genes of interest
@@ -158,7 +176,8 @@ Cyp51a$CHANGEPEP == Cyp51a_variable$CHANGEPEP
 n_variants_per_gene_per_strain<- function(gene_df){
   #shrink the df 
   REF<- data.frame(gene_df$REF)
-  strains<- gene_df[, 11:(ncol(gene_df) -1)]
+  #strains<- gene_df[, 11:(ncol(gene_df) -1)]
+  strains<- gene_df[, 11:(ncol(gene_df))]
   #create true/false data frame: true if not == reference, and not == "." (possible misscalls)
   T_F_df<- data.frame(apply(strains, 2, function(x) (x != REF$gene_df.REF) & (x != ".")))
   if (nrow(strains) >1) {
@@ -177,7 +196,8 @@ n_variants_per_gene_per_strain<- function(gene_df){
 
 #use the above function in it's own function to loop over each mutation to make a df for graphing and get totals across all strains.
 make_by_variant_output <- function(input){
-  output<- data.frame(matrix(NA, nrow = ncol(input[, 11:(ncol(input) -1)]), ncol = 1))
+  #output<- data.frame(matrix(NA, nrow = ncol(input[, 11:(ncol(input) -1)]), ncol = 1))
+  output<- data.frame(matrix(NA, nrow = ncol(input[, 11:(ncol(input))]), ncol = 1))
   #for each row (variant) get presence/ absence for which strains have the variant
   for (i in 1:nrow(input)){
     output[[i]]<- n_variants_per_gene_per_strain(input[i,])
@@ -244,7 +264,6 @@ row.names(by_variant_output_df_colapse)<- row.names(by_variant_output_df[[1]])
 #same for unknown function vars
 by_variant_output_df_colapse_unknown<- bind_rows(lapply(by_variant_output_df_all_but_vir,function(i)do.call(cbind,i)))
 row.names(by_variant_output_df_colapse_unknown)<- row.names(by_variant_output_df_all_but_vir[[1]])
-
 
 #order columns by abundance
 colSums(by_variant_output_df_colapse)
@@ -518,4 +537,3 @@ all_tree<- all_tree_plot + geom_tiplab(size = .8, align = TRUE, linesize = .25, 
 all_tree
 #export
 ggsave(file="non_Cyp51A_variants.pdf",device="pdf", all_tree, width=18, height=8, units="in")
-
