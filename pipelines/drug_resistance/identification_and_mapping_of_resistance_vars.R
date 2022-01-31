@@ -1,5 +1,5 @@
 ##This is a test to look at the distribution of known resistance variants in the pop-genome data for 260 strains of A.fumigatus
-#last updated 4.Dec.2021
+#last updated 30.Jan.2021
 
 #load modules
 require(data.table)
@@ -16,7 +16,7 @@ library(ggplot2)
 library(stringr)
 
 #set wd
-setwd("~/Desktop/Project_Afum_pangenome_2/")
+setwd("~/Desktop/Project_Afum_pangenome_3/")
 options(stringsAsFactors = FALSE)
 
 #sessionInfo() 
@@ -24,21 +24,19 @@ options(stringsAsFactors = FALSE)
 ##set seed for reproducibility
 set.seed(666)
 
+
 ##read in data
-snpEff_all<-read.delim("Pop_for_pan_260.snpEff.matrix.tsv", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = FALSE)
-Afum_grp<-read.delim("clade_map_K3_20Jan2021.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = TRUE)
+snpEff_all<-read.delim("Pop_for_pan_260.v2.snpEff.matrix.tsv", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = FALSE)
+Afum_grp<-read.delim("clade_map_K3_3Jan2022.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = TRUE)
 resistance_db<-read.delim("Afum_azole_mutations.csv", header = TRUE, sep = ",", fill = TRUE, strip.white = TRUE)
-tree <- read.tree("Afum_260_iq_tree_newick.tre")
+tree <- read.tree("Afum_260_iq_tree_newick_v2.tre")
+
 #remove the reference from the tree:
 tree<- drop.tip(tree, "Af293-REF", trim.internal = TRUE, subtree = FALSE,
                    root.edge = 0, rooted = is.rooted(tree), collapse.singles = TRUE,
                    interactive = FALSE)
-#match tree (for the couple sp. that are  miss-named)
-tree$tip.label[tree$tip.label=="F18149"] <- "F18149-JCVI"
-tree$tip.label[tree$tip.label=="Afu_343-P/11"] <- "Afu_343-P-11"
-tree$tip.label[tree$tip.label=="AFIS1435CDC_6"] <- "AFIS1435_CDC_6"
-#root tree based on small outgroup tree (at node 266)
-tree<- root(tree, node = 266, resolve.root = FALSE,
+#root tree
+tree<- root(tree, node = 505, resolve.root = TRUE,
                interactive = FALSE, edgelabel = FALSE)
 
 
@@ -51,12 +49,12 @@ snpEff_all[] <- lapply(snpEff_all, gsub, pattern='/', replacement="")
 
 #get set size
 dim(snpEff_all[,11:(ncol(snpEff_all) -1)])
-#260 strains, 74797 variants
+#260 strains, 441,000 variants 
 
 #subset to only missense variants 
 snpEff_no_intergenic<- snpEff_all[snpEff_all$TYPE == "missense_variant",]
 dim(snpEff_no_intergenic)
-#12926 positions with missence variants
+#75,730 missence variants
 
 ###sep each gene of interest in the resistance_db, sep snpEff_no_intergenic into their own dfs
 #set genes of interest
@@ -68,7 +66,8 @@ snpEff_no_intergenic_GOI <- snpEff_no_intergenic[snpEff_no_intergenic$GENE %in% 
 #how many genes have variants in them?
 genes_w_vars<- unique(snpEff_no_intergenic_GOI$GENE)
 genes_w_vars
-#five of them: "Afu4g06890" "Afu4g08340" "Afu4g10000" "Afu7g01960" "Afu7g03740"
+length(genes_w_vars)
+#variants in all 13 genes 
 
 #split each gene into it's own df (keep in a list)
 listDf_GOI_variants <- split(snpEff_no_intergenic_GOI, f = snpEff_no_intergenic_GOI$GENE)
@@ -114,7 +113,7 @@ get_resistance_mutations_variable <- function(variants_OI, resistance_db_OI){
 #run function
 list_of_dfs_resistance_vars_in_dataset<- get_resistance_mutations(variants_OI = listDf_GOI_variants, resistance_db_OI = listDf_resistance_db_GOI)
 names(list_of_dfs_resistance_vars_in_dataset)
-#Here we only have mutations in Cyp51A
+#charicterized resistance variants in Cyp51A only
 
 #isolate Cyp51A
 Cyp51a<- list_of_dfs_resistance_vars_in_dataset[[1]]
@@ -123,14 +122,34 @@ Cyp51a<- list_of_dfs_resistance_vars_in_dataset[[1]]
 #How about if it's a variable change at the same position?
 list_of_dfs_resistance_vars_in_dataset_variable<- get_resistance_mutations_variable(variants_OI = listDf_GOI_variants, resistance_db_OI = listDf_resistance_db_GOI)
 names(list_of_dfs_resistance_vars_in_dataset_variable)
-#still only Cyp51A
-#isolate this too
-Cyp51a_variable<- list_of_dfs_resistance_vars_in_dataset_variable[[1]]
+# - now there's also Afu2g03700
+#how many have this mutation? 
+Afu2g03700<- list_of_dfs_resistance_vars_in_dataset_variable$Afu2g03700
+cols_to_exclude<- c("CHROM",
+                    "POS",
+                    "FLANKING",
+                    "TYPE",
+                    "IMPACT",
+                    "GENE",
+                    "CHANGEDNA",
+                    "CHANGEPEP",
+                    "REF",
+                    "ALT",
+                    "ANN")
+                    
+                    
+
+Afu2g03700_only<- Afu2g03700[,!names(Afu2g03700) %in% cols_to_exclude]
+rowSums(Afu2g03700_only == "C")#three strains have this variant
+
+
+#isolate variable (uncharacterized) Cyp51A variants at known positions
+Cyp51a_variable<- list_of_dfs_resistance_vars_in_dataset_variable[[2]]
 
 #check if they're the same
-dim(Cyp51a)
-dim(Cyp51a_variable)
+Cyp51a$CHANGEPEP == Cyp51a_variable$CHANGEPEP
 #yes - no new aa changes at positions of known resistance variants.
+
 
 ##make presence/absence dataframe for presence of variants in each gene and map onto tree file. 
 
@@ -195,7 +214,7 @@ colSums(by_variant_output_df)
 ##map onto tree
 
 #set colors by group for clade
-grA_me<- split(Afum_grp$name_pop_genome, Afum_grp$clade)
+grA_me<- split(Afum_grp$name_pop_genome_new, Afum_grp$clade)
 tree_grA_me <- ggtree::groupOTU(tree, grA_me)
 str(tree_grA_me)
 levels(attributes(tree_grA_me)$group) 
@@ -302,25 +321,54 @@ p
 #ggsave(file="Cyp51A_variants.pdf",device="pdf", p, width=8, height=8, units="in")
 
 
-#make supplemental figure of all missence variants from all strains (includng those for which only expression data is availble)
-#remove cyp51a results
+
+#make supplemental figure of all missence variants from all strains (including those for which only expression data is available)
 genes_w_vars
 
-
 #isolate the four other genes with non-syn changes in resistance genes:
+fks1_all<- snpEff_no_intergenic_GOI[snpEff_no_intergenic_GOI$GENE == "Afu6g12400",]
+nrow(fks1_all)# 5 positions
+atrF_all<- snpEff_no_intergenic_GOI[snpEff_no_intergenic_GOI$GENE == "Afu6g04360",]
+nrow(atrF_all)# 12 positions
+mdr1_all<- snpEff_no_intergenic_GOI[snpEff_no_intergenic_GOI$GENE == "Afu5g06070",]
+nrow(mdr1_all)# 9 positions
+mdr3_all<- snpEff_no_intergenic_GOI[snpEff_no_intergenic_GOI$GENE == "Afu3g03500",]
+nrow(mdr3_all)# 15 positions
+hapE_all<- snpEff_no_intergenic_GOI[snpEff_no_intergenic_GOI$GENE == "Afu2g14720",]
+nrow(hapE_all)# 1 positions
+hmg1_all<- snpEff_no_intergenic_GOI[snpEff_no_intergenic_GOI$GENE == "Afu2g03700",]
+nrow(hmg1_all)# 10 positions
+cdr1B_abcC_all<- snpEff_no_intergenic_GOI[snpEff_no_intergenic_GOI$GENE == "Afu1g14330",]
+nrow(cdr1B_abcC_all)# 8 positions
+mdr4_all<- snpEff_no_intergenic_GOI[snpEff_no_intergenic_GOI$GENE == "Afu1g12690",]
+nrow(mdr4_all)# 15 positions
 cox10_all<- snpEff_no_intergenic_GOI[snpEff_no_intergenic_GOI$GENE == "Afu4g08340",]
 nrow(cox10_all)# 12 positions
-
 mdr2_all<- snpEff_no_intergenic_GOI[snpEff_no_intergenic_GOI$GENE == "Afu4g10000",]
 nrow(mdr2_all)# 6 positions
-
 cyp51B_all<- snpEff_no_intergenic_GOI[snpEff_no_intergenic_GOI$GENE == "Afu7g03740",]
 nrow(cyp51B_all)# 2 positions
-
 AFUA_7G01960_all<- snpEff_no_intergenic_GOI[snpEff_no_intergenic_GOI$GENE == "Afu7g01960",]
 nrow(AFUA_7G01960_all)# 7 positions
 
+
 #make presence/absence df by strain
+fks1_all_PA<- make_by_variant_output(input = fks1_all)
+colSums(fks1_all_PA)
+atrF_all_PA<- make_by_variant_output(input = atrF_all)
+colSums(atrF_all_PA)
+mdr1_all_PA<- make_by_variant_output(input = mdr1_all)
+colSums(mdr1_all_PA)
+mdr3_all_PA<- make_by_variant_output(input = mdr3_all)
+colSums(mdr3_all_PA)
+hapE_all_PA<- make_by_variant_output(input = hapE_all)
+colSums(hapE_all_PA)
+hmg1_all_PA<- make_by_variant_output(input = hmg1_all)
+colSums(hmg1_all_PA)
+cdr1B_abcC_all_PA<- make_by_variant_output(input = cdr1B_abcC_all)
+colSums(cdr1B_abcC_all_PA)
+mdr4_all_PA<- make_by_variant_output(input = mdr4_all)
+colSums(mdr4_all_PA)
 cox10_all_PA<- make_by_variant_output(input = cox10_all)
 colSums(cox10_all_PA)
 mdr2_all_PA<- make_by_variant_output(input = mdr2_all)
@@ -330,30 +378,82 @@ colSums(cyp51B_all_PA)
 AFUA_7G01960_all_PA<- make_by_variant_output(input = AFUA_7G01960_all)
 colSums(AFUA_7G01960_all_PA)
 
-
-#format resistance allele data for graphing
+##format resistance allele data for graphing
 #colapse df of df because you're an idiot and didn't append these as a list in the first place
+fks1_colapse<- bind_rows(lapply(fks1_all_PA,function(i)do.call(cbind,i)))
+row.names(fks1_colapse)<- row.names(fks1_all_PA[[1]])
+atrF_colapse<- bind_rows(lapply(atrF_all_PA,function(i)do.call(cbind,i)))
+row.names(atrF_colapse)<- row.names(atrF_all_PA[[1]])
+mdr1_colapse<- bind_rows(lapply(mdr1_all_PA,function(i)do.call(cbind,i)))
+row.names(mdr1_colapse)<- row.names(mdr1_all_PA[[1]])
+mdr3_colapse<- bind_rows(lapply(mdr3_all_PA,function(i)do.call(cbind,i)))
+row.names(mdr3_colapse)<- row.names(mdr3_all_PA[[1]])
+hapE_colapse<- bind_rows(lapply(hapE_all_PA,function(i)do.call(cbind,i)))
+row.names(hapE_colapse)<- row.names(hapE_all_PA[[1]])
+hmg1_colapse<- bind_rows(lapply(hmg1_all_PA,function(i)do.call(cbind,i)))
+row.names(hmg1_colapse)<- row.names(hmg1_all_PA[[1]])
+cdr1B_abcC_colapse<- bind_rows(lapply(cdr1B_abcC_all_PA,function(i)do.call(cbind,i)))
+row.names(cdr1B_abcC_colapse)<- row.names(cdr1B_abcC_all_PA[[1]])
+mdr4_colapse<- bind_rows(lapply(mdr4_all_PA,function(i)do.call(cbind,i)))
+row.names(mdr4_colapse)<- row.names(mdr4_all_PA[[1]])
 cox10_colapse<- bind_rows(lapply(cox10_all_PA,function(i)do.call(cbind,i)))
 row.names(cox10_colapse)<- row.names(cox10_all_PA[[1]])
-
 mdr2_colapse<- bind_rows(lapply(mdr2_all_PA,function(i)do.call(cbind,i)))
 row.names(mdr2_colapse)<- row.names(mdr2_all_PA[[1]])
-
 cyp51B_colapse<- bind_rows(lapply(cyp51B_all_PA,function(i)do.call(cbind,i)))
 row.names(cyp51B_colapse)<- row.names(cyp51B_all_PA[[1]])
-
 AFUA_7G01960_colapse<- bind_rows(lapply(AFUA_7G01960_all_PA,function(i)do.call(cbind,i)))
 row.names(AFUA_7G01960_colapse)<- row.names(AFUA_7G01960_all_PA[[1]])
 
 
-
 #order columns by abundance
+fks1_by_abundance<- fks1_colapse[,order(colSums(-fks1_colapse))]
+atrF_by_abundance<- atrF_colapse[,order(colSums(-atrF_colapse))]
+mdr1_by_abundance<- mdr1_colapse[,order(colSums(-mdr1_colapse))]
+mdr3_by_abundance<- mdr3_colapse[,order(colSums(-mdr3_colapse))]
+hapE_by_abundance<- hapE_colapse[,order(colSums(-hapE_colapse))]
+hmg1_by_abundance<- hmg1_colapse[,order(colSums(-hmg1_colapse))]
+cdr1B_abcC_by_abundance<- cdr1B_abcC_colapse[,order(colSums(-cdr1B_abcC_colapse))]
+mdr4_by_abundance<- mdr4_colapse[,order(colSums(-mdr4_colapse))]
 cox10_by_abundance<- cox10_colapse[,order(colSums(-cox10_colapse))]
 mdr2_by_abundance<- mdr2_colapse[,order(colSums(-mdr2_colapse))]
 cyp51B_by_abundance<- cyp51B_colapse[,order(colSums(-cyp51B_colapse))]
 AFUA_7G01960_by_abundance<- AFUA_7G01960_colapse[,order(colSums(-AFUA_7G01960_colapse))]
 
+
 #set presence/absence
+fks1_by_abundance_presence<- data.frame(sapply(fks1_by_abundance, gsub, pattern = "1", replacement = "present"))
+fks1_by_abundance_presence_absence<- data.frame(sapply(fks1_by_abundance_presence, gsub, pattern = "0", replacement = "absent"))
+row.names(fks1_by_abundance_presence_absence)<- row.names(fks1_colapse)
+
+atrF_by_abundance_presence<- data.frame(sapply(atrF_by_abundance, gsub, pattern = "1", replacement = "present"))
+atrF_by_abundance_presence_absence<- data.frame(sapply(atrF_by_abundance_presence, gsub, pattern = "0", replacement = "absent"))
+row.names(atrF_by_abundance_presence_absence)<- row.names(atrF_colapse)
+
+mdr1_by_abundance_presence<- data.frame(sapply(mdr1_by_abundance, gsub, pattern = "1", replacement = "present"))
+mdr1_by_abundance_presence_absence<- data.frame(sapply(mdr1_by_abundance_presence, gsub, pattern = "0", replacement = "absent"))
+row.names(mdr1_by_abundance_presence_absence)<- row.names(mdr1_colapse)
+
+mdr3_by_abundance_presence<- data.frame(sapply(mdr3_by_abundance, gsub, pattern = "1", replacement = "present"))
+mdr3_by_abundance_presence_absence<- data.frame(sapply(mdr3_by_abundance_presence, gsub, pattern = "0", replacement = "absent"))
+row.names(mdr3_by_abundance_presence_absence)<- row.names(mdr3_colapse)
+
+hapE_by_abundance_presence<- data.frame(sapply(hapE_by_abundance, gsub, pattern = "1", replacement = "present"))
+hapE_by_abundance_presence_absence<- data.frame(sapply(hapE_by_abundance_presence, gsub, pattern = "0", replacement = "absent"))
+row.names(hapE_by_abundance_presence_absence)<- row.names(hapE_colapse)
+
+hmg1_by_abundance_presence<- data.frame(sapply(hmg1_by_abundance, gsub, pattern = "1", replacement = "present"))
+hmg1_by_abundance_presence_absence<- data.frame(sapply(hmg1_by_abundance_presence, gsub, pattern = "0", replacement = "absent"))
+row.names(hmg1_by_abundance_presence_absence)<- row.names(hmg1_colapse)
+
+cdr1B_abcC_by_abundance_presence<- data.frame(sapply(cdr1B_abcC_by_abundance, gsub, pattern = "1", replacement = "present"))
+cdr1B_abcC_by_abundance_presence_absence<- data.frame(sapply(cdr1B_abcC_by_abundance_presence, gsub, pattern = "0", replacement = "absent"))
+row.names(cdr1B_abcC_by_abundance_presence_absence)<- row.names(cdr1B_abcC_colapse)
+
+mdr4_by_abundance_presence<- data.frame(sapply(mdr4_by_abundance, gsub, pattern = "1", replacement = "present"))
+mdr4_by_abundance_presence_absence<- data.frame(sapply(mdr4_by_abundance_presence, gsub, pattern = "0", replacement = "absent"))
+row.names(mdr4_by_abundance_presence_absence)<- row.names(mdr4_colapse)
+
 cox10_by_abundance_presence<- data.frame(sapply(cox10_by_abundance, gsub, pattern = "1", replacement = "present"))
 cox10_by_abundance_presence_absence<- data.frame(sapply(cox10_by_abundance_presence, gsub, pattern = "0", replacement = "absent"))
 row.names(cox10_by_abundance_presence_absence)<- row.names(cox10_colapse)
@@ -371,105 +471,51 @@ AFUA_7G01960_by_abundance_presence_absence<- data.frame(sapply(AFUA_7G01960_by_a
 row.names(AFUA_7G01960_by_abundance_presence_absence)<- row.names(AFUA_7G01960_colapse)
 
 
+#add suffix to collumn names
+colnames(fks1_by_abundance_presence_absence)<-paste(colnames(fks1_by_abundance_presence_absence),"fks1",sep="_")
+colnames(atrF_by_abundance_presence_absence)<-paste(colnames(atrF_by_abundance_presence_absence),"atrF",sep="_")
+colnames(mdr1_by_abundance_presence_absence)<-paste(colnames(mdr1_by_abundance_presence_absence),"mdr1",sep="_")
+colnames(mdr3_by_abundance_presence_absence)<-paste(colnames(mdr3_by_abundance_presence_absence),"mdr3",sep="_")
+colnames(hapE_by_abundance_presence_absence)<-paste(colnames(hapE_by_abundance_presence_absence),"hapE",sep="_")
+colnames(hmg1_by_abundance_presence_absence)<-paste(colnames(hmg1_by_abundance_presence_absence),"hmg1",sep="_")
+colnames(cdr1B_abcC_by_abundance_presence_absence)<-paste(colnames(cdr1B_abcC_by_abundance_presence_absence),"cdr1B_abcC",sep="_")
+colnames(mdr4_by_abundance_presence_absence)<-paste(colnames(mdr4_by_abundance_presence_absence),"mdr4",sep="_")
+colnames(cox10_by_abundance_presence_absence)<-paste(colnames(cox10_by_abundance_presence_absence),"cox10",sep="_")
+colnames(mdr2_by_abundance_presence_absence)<-paste(colnames(mdr2_by_abundance_presence_absence),"mdr2",sep="_")
+colnames(cyp51B_by_abundance_presence_absence)<-paste(colnames(cyp51B_by_abundance_presence_absence),"cyp51B",sep="_")
+colnames(AFUA_7G01960_by_abundance_presence_absence)<-paste(colnames(AFUA_7G01960_by_abundance_presence_absence),"AFUA_7G01960",sep="_")
 
-#bind and highlight - can't get width right when adjacent. 
-#all_vars<- cbind(by_variant_output_df_binary_presence_absence, by_variant_output_df_binary_presence_absence_unknowns)
-cox10_tree_plot <-  gheatmap(tree_plot_me, 
-                              cox10_by_abundance_presence_absence,
-                              offset=0, width=0.8, low="white", high="black", 
-                              colnames = T, 
-                              colnames_angle = 45,
-                              colnames_position = "top",
-                              font.size = 1,
-                              colnames_offset_y = -6,
-                              colnames_offset_x = .05,
-                              color="white") +
-  scale_fill_manual(values=c("white", "black")) +
-ggtitle("cox10 variants")
-
-cox10_tree<- cox10_tree_plot + geom_tiplab(size = .8, align = TRUE, linesize = .25, offset = 1.2, linetype = 0)
-cox10_tree
-names(cox10_by_abundance_presence_absence)
-ncol(cox10_by_abundance_presence_absence)
-
-mdr2_tree_plot <-  gheatmap(tree_plot_me, 
-                            mdr2_by_abundance_presence_absence,
-                             offset=0, width=0.8, low="white", high="black", 
-                             colnames = T, 
-                             colnames_angle = 45,
-                             colnames_position = "top",
-                             font.size = 1,
-                             colnames_offset_y = -6,
-                             colnames_offset_x = .05,
-                             color="white") +
-  scale_fill_manual(values=c("white", "black")) +
-  ggtitle("mdr2 variants")
-
-mdr2_tree<- mdr2_tree_plot + geom_tiplab(size = .8, align = TRUE, linesize = .25, offset = 1.2, linetype = 0)
-mdr2_tree
-names(mdr2_by_abundance_presence_absence)
-ncol(mdr2_by_abundance_presence_absence)
-
-
-
-Cyp51B_tree_plot <-  gheatmap(tree_plot_me, 
-                            cyp51B_by_abundance_presence_absence,
-                            offset=0, width=0.8, low="white", high="black", 
-                            colnames = T, 
-                            colnames_angle = 45,
-                            colnames_position = "top",
-                            font.size = 1,
-                            colnames_offset_y = -6,
-                            colnames_offset_x = .05,
-                            color="white") +
-  scale_fill_manual(values=c("white", "black")) +
-  ggtitle("Cyp51B variants")
-
-Cyp51B_tree<- Cyp51B_tree_plot + geom_tiplab(size = .8, align = TRUE, linesize = .25, offset = 1.2, linetype = 0)
-Cyp51B_tree
-names(cyp51B_by_abundance_presence_absence)
-ncol(cyp51B_by_abundance_presence_absence)
-
-
-
-AFUA_7G01960_tree_plot <-  gheatmap(tree_plot_me, 
-                              AFUA_7G01960_by_abundance_presence_absence,
-                              offset=0, width=0.8, low="white", high="black", 
-                              colnames = T, 
-                              colnames_angle = 45,
-                              colnames_position = "top",
-                              font.size = 1,
-                              colnames_offset_y = -6,
-                              colnames_offset_x = .05,
-                              color="white") +
-  scale_fill_manual(values=c("white", "black")) +
-  ggtitle("AFUA_7G01960 variants")
-
-AFUA_7G01960_tree<- AFUA_7G01960_tree_plot + geom_tiplab(size = .8, align = TRUE, linesize = .25, offset = 1.2, linetype = 0)
-AFUA_7G01960_tree
-names(AFUA_7G01960_by_abundance_presence_absence)
-ncol(AFUA_7G01960_by_abundance_presence_absence)
-
-#bind and plot together
-all_all_vars<- cbind(cox10_by_abundance_presence_absence,
-                     mdr2_by_abundance_presence_absence,
+###
+#bind and plot together (alphabetically)
+all_all_vars<- cbind(AFUA_7G01960_by_abundance_presence_absence,
+                     atrF_by_abundance_presence_absence,
+                     cdr1B_abcC_by_abundance_presence_absence,
+                     cox10_by_abundance_presence_absence,
                      cyp51B_by_abundance_presence_absence,
-                     AFUA_7G01960_by_abundance_presence_absence)
+                     fks1_by_abundance_presence_absence,
+                     hapE_by_abundance_presence_absence,
+                     hmg1_by_abundance_presence_absence,
+                     mdr1_by_abundance_presence_absence,
+                     mdr2_by_abundance_presence_absence,
+                     mdr3_by_abundance_presence_absence,
+                     mdr4_by_abundance_presence_absence)
+
+
 
 all_tree_plot <-  gheatmap(tree_plot_me, 
                            all_all_vars,
-                                    offset=0, width=1, low="white", high="black", 
+                                    offset=.1, width=1, low="white", high="black", 
                                     colnames = T, 
-                                    colnames_angle = 45,
+                                    colnames_angle = 90,
                                     colnames_position = "top",
-                                    font.size = 1,
-                                    colnames_offset_y = -6,
-                                    colnames_offset_x = .05,
+                                    font.size = .8,
+                                    colnames_offset_y = -8,
+                                    #colnames_offset_x = -.1,
                                     color="white") +
   scale_fill_manual(values=c("white", "black")) 
-#+ggtitle("all variants")
 
 all_tree<- all_tree_plot + geom_tiplab(size = .8, align = TRUE, linesize = .25, offset = 1.4, linetype = 0)
 all_tree
 #export
-#ggsave(file="non_Cyp51A_variants.pdf",device="pdf", all_tree, width=8, height=8, units="in")
+ggsave(file="non_Cyp51A_variants.pdf",device="pdf", all_tree, width=18, height=8, units="in")
+
