@@ -300,7 +300,7 @@ length(names_of_sig_results)
 
 #top x results
 p_vals_kw_sig_ordered<- p_vals_kw_sig[order(p_vals_kw_sig$p.adjust),]
-p_vals_kw_sig_top10<- p_vals_kw_sig_ordered[1:7,]
+p_vals_kw_sig_top10<- p_vals_kw_sig_ordered[1:10,]
 names_of_sig_results_top_10<- rownames(p_vals_kw_sig_top10)
 
 #####
