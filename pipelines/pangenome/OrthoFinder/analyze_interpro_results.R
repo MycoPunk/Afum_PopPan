@@ -1,6 +1,6 @@
 #A fum pan genome analysis, look as interpro annotation results for Clade specific gene families
 #started: 12.May.2021
-#last updated: 12.Nov.2021
+#last updated: 7.Jul.2022
 
 #set packages 
 library(data.table)
@@ -18,7 +18,7 @@ library(scales)
 library(cowplot)
 library(biostat)
 
-#setwd("~/Desktop/Project_Afum_pangenome_2")
+setwd("~/Desktop/Project_Afum_pangenome_3")
 
 anno_all<-as.data.frame(fread("Af.pan.genome.iprout.tsv", header = FALSE, sep = "\t", strip.white=TRUE, quote="", fill = TRUE))
 
@@ -91,10 +91,17 @@ length(unique(singleton$Orthogroup)) #2,109. -yes these all match up.
 #mean(missing_anno$`average_length(bp)`) #yeah, maybe - they are about half the length. Ave. of 485 bp. 
 #nrow(missing_anno)
 
+
+#concatonate for printing
+core_temp<- cbind("Orthogroup"= core$Orthogroup, "Abundance" = "core")
+accessory_temp<- cbind("Orthogroup"= accessory$Orthogroup, "Abundance" = "accessory")
+singleton_temp<- cbind("Orthogroup"= singleton$Orthogroup, "Abundance" = "singleton")
+
+to_print<- rbind(core_temp, accessory_temp, singleton_temp)
+
 #print
-#write.table(core$gene_family, "core.txt", sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
-#write.table(accessory$gene_family, "accessory.txt", sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
-#write.table(singleton$gene_family, "singleton.txt", sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+write.table(to_print, "Orthogroup_abundance.txt", sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+
 
 ##subset to clade 1, 2 and 3 to get gene lists
 #read in gene list files exclusive to ea. clade
