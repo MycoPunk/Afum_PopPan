@@ -1,5 +1,5 @@
 #A fum pan genome analysis, using proteins clustered by Ortho Finder results
-#last updated: 30.Jan.2022
+#last updated: 15.Aug.2022
 
 #set packages 
 library(data.table)
@@ -48,6 +48,10 @@ strain_names<- names(strains_only)
 ngenomes<- length(unique(strain_names)) 
 ngenomes
 #260
+
+
+#print to cross ref for tree building
+#write.table(strain_names, "strain_names_27Sep2021.txt", sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 
 #add number_genomes column to get totals
 #first replace blank calls with NAs
@@ -199,7 +203,7 @@ accessory_variance<- var(ave_accessory)
 accessory_variance #14,087.88
 #sd
 accesory_sd<- sd(ave_accessory)
-accesory_sd #0.4420526
+accesory_sd #118.6924
 
 #get average singletons
 ave_singletons<- colSums(singletons_only)
@@ -231,7 +235,6 @@ mean(accessory_by_strain$totals)
 
 
 #fix names so that they match 
-#name_map<-read.delim("clade_map_K3_20Jan2021.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = TRUE)
 name_map<-read.delim("clade_map_K3_3Jan2022.txt", header = TRUE, sep = "\t", fill = TRUE, strip.white = TRUE, check.names = TRUE)
 
 
@@ -239,6 +242,7 @@ row.names(accessory_by_strain) <- name_map$name_to_use_in_paper[match(row.names(
 accessory_by_strain$pop_name<- row.names(accessory_by_strain)
 #remove "DMC2" for graphing 
 #accessory_by_strain$pop_name<- sapply(accessory_by_strain$pop_name, gsub, pattern = "DMC2_", replacement = "")
+
 
 
 #graph accessory genome size by strain
@@ -257,7 +261,7 @@ p
 #        axis.text.x = element_text(size = 2, angle=90, hjust=1), legend.position = "none")+
 #  facet_zoom(ylim = c(min(accessory_by_strain$totals), max(accessory_by_strain$totals)), zoom.data = ifelse(a <= 6000,  FALSE))
 
-ggsave("accessory.pdf",p, width=6.9, height=3, units="in")
+#ggsave("accessory.pdf",p, width=6.9, height=3, units="in")
 
 
 
@@ -311,14 +315,15 @@ p
 ###graph presence / absence matrix on to big tree
 
 #tree with 260 strains
+#tree_me <- read.tree("Afum_260_iq_tree_newick.tre")
 tree_me <- read.tree("Afum_260_iq_tree_newick_v2.tre")
 #remove the reference from the tree:
 tree_me<- drop.tip(tree_me, "Af293-REF", trim.internal = TRUE, subtree = FALSE,
-                root.edge = 0, rooted = is.rooted(tree_me), collapse.singles = TRUE,
-                interactive = FALSE)
+                   root.edge = 0, rooted = is.rooted(tree_me), collapse.singles = TRUE,
+                   interactive = FALSE)
 #root tree
 tree_me<- root(tree_me, node = 505, resolve.root = TRUE,
-            interactive = FALSE, edgelabel = FALSE)
+               interactive = FALSE, edgelabel = FALSE)
 
 #attach the clade annotations 
 singletons_only_by_strain$clade<- name_map$clade[match(row.names(singletons_only_by_strain), name_map$name_to_use_in_paper)]
@@ -350,6 +355,7 @@ accessory_clade2<- accessory_by_strain[accessory_by_strain$clade == "2",]
 mean(accessory_clade2$totals) # 1160 (vs. 982 using PIRATE)
 accessory_clade3<- accessory_by_strain[accessory_by_strain$clade == "3",]
 mean(accessory_clade3$totals) # 1075 (vs. 974 using PIRATE)
+
 
 ##is that significant?
 #check variance 
@@ -416,7 +422,7 @@ scales::show_col(my_cols_me_mat); my_cols_me_mat
 
 #optional ultrametric tree 
 #tree_grA_me_ultra<- force.ultrametric(tree_grA_me)
-  
+
 
 #simple plot
 tree_plot_me <- 
@@ -424,7 +430,7 @@ tree_plot_me <-
          # color by group attribute, check str(tree_grA_me)
          mapping = aes(color = group), 
          layout  = 'circular', 
-        # layout  = 'rectangular', 
+         # layout  = 'rectangular', 
          branch.length = 'none', 
          #  geom_treescale(x=3, y=NULL, color = "white") +
          # set line thickness
@@ -667,8 +673,8 @@ tree_all_data<- tree_plot + geom_tiplab(size = .09, align = TRUE, linesize = .20
 
 tree_all_data 
 
-ggsave("pan_genome_tree_w_bars_and_mat1-2-4.pdf", tree_all_data, width=22, height=22, 
-       device = "pdf", units = "cm")
+#ggsave("pan_genome_tree_w_bars_and_mat1-2-4.pdf", tree_all_data, width=22, height=22, 
+#       device = "pdf", units = "cm")
 
 
 sum(name_map$MAT_type == "MAT1") #144
@@ -697,16 +703,42 @@ gene_fam_by_strain_w_anno_ones_num <- mutate_all(gene_fam_by_strain_w_anno_ones,
 #bind annotations
 gene_fam_by_strain_w_anno_ones_num2<- cbind(OF.gene_families_all = OF.gene_families_all$Orthogroup, gene_fam_by_strain_w_anno_ones_num)
 
+#the same w/o intorgresesd strains
+strains_to_remove<- c("F7763", 
+                      "CF098",
+                      "AF293",
+                      "F18304",
+                      "CM7632",
+                      "10_01_02_27",
+                      "12_7505220",
+                      "RSF2S8")
 
+gene_fam_by_strain_w_anno_ones_num2_no_intro<- gene_fam_by_strain_w_anno_ones_num2[!names(gene_fam_by_strain_w_anno_ones_num2) %in% strains_to_remove]
+#check
+dim(gene_fam_by_strain_w_anno_ones_num2)
+dim(gene_fam_by_strain_w_anno_ones_num2_no_intro)
 
 #subset to remove core genes and singletons 
 #remove core
 all_accessory_anno<- gene_fam_by_strain_w_anno_ones_num2[rowSums(gene_fam_by_strain_w_anno_ones_num2[,2:ncol(gene_fam_by_strain_w_anno_ones_num2)]) < cutoff,]
 dim(all_accessory_anno)
 
+#the same but with introgressed strains removed
+cutoff2<- round(.95*252)
+all_accessory_anno_no_intro<- gene_fam_by_strain_w_anno_ones_num2_no_intro[rowSums(gene_fam_by_strain_w_anno_ones_num2_no_intro[,2:ncol(gene_fam_by_strain_w_anno_ones_num2_no_intro)]) < cutoff2,]
+dim(all_accessory_anno_no_intro)
+
 #remove singletons
 all_accessory_anno_no_sing<- all_accessory_anno[rowSums(all_accessory_anno[,2:ncol(all_accessory_anno)]) != 1,]
 dim(all_accessory_anno_no_sing)
+
+#the same but with introgressed strains removed
+all_accessory_anno_no_sing_no_intro<- all_accessory_anno_no_intro[rowSums(all_accessory_anno_no_intro[,2:ncol(all_accessory_anno_no_intro)]) != 1,]
+dim(all_accessory_anno_no_sing_no_intro)
+
+#plus remove 0's from the subset dataset
+all_accessory_anno_no_sing_no_intro<- all_accessory_anno_no_sing_no_intro[rowSums(all_accessory_anno_no_sing_no_intro[,2:ncol(all_accessory_anno_no_sing_no_intro)]) != 0,]
+dim(all_accessory_anno_no_sing_no_intro)
 
 #split list of strain names by clade
 accessory_by_strain_list <- setNames(accessory_by_strain$clade, accessory_by_strain$strain)
@@ -725,10 +757,25 @@ dim(clade1) #note this is +1 in ea row as the OG is the first col
 dim(clade2)
 dim(clade3)
 
+
+#the same for introgressed strains
+clade1_no_intro<- cbind(OF_gene_fam = all_accessory_anno_no_sing_no_intro[,1], all_accessory_anno_no_sing_no_intro[,colnames(all_accessory_anno_no_sing_no_intro) %in% names(clade1_names)])
+clade2_no_intro<- cbind(OF_gene_fam = all_accessory_anno_no_sing_no_intro[,1], all_accessory_anno_no_sing_no_intro[,colnames(all_accessory_anno_no_sing_no_intro) %in% names(clade2_names)])
+clade3_no_intro<- cbind(OF_gene_fam = all_accessory_anno_no_sing_no_intro[,1], all_accessory_anno_no_sing_no_intro[,colnames(all_accessory_anno_no_sing_no_intro) %in% names(clade3_names)])
+
+dim(clade1_no_intro) #note this is +1 in ea row as the OG is the first col #this is 195 with introgressed removed.
+dim(clade2_no_intro) #this is 42 with introgressed removed
+dim(clade3_no_intro) #this is 15 in introgresed removed
+
+####
 #are there gene families that are exclusive to clade 1?
 clade1$totals<-  rowSums(clade1[,2:ncol(clade1)])
 clade2$totals<-  rowSums(clade2[,2:ncol(clade2)])
 clade3$totals<-  rowSums(clade3[,2:ncol(clade3)])
+
+clade1_no_intro$totals<-  rowSums(clade1_no_intro[,2:ncol(clade1_no_intro)])
+clade2_no_intro$totals<-  rowSums(clade2_no_intro[,2:ncol(clade2_no_intro)])
+clade3_no_intro$totals<-  rowSums(clade3_no_intro[,2:ncol(clade3_no_intro)])
 
 
 #get fams exclusive to clade1
@@ -751,6 +798,28 @@ dim(exclusive_to_clade1_of_note)
 #there are no gene fams in =>95% of the strians in clade 1
 exclusive_to_clade1_of_note
 
+#get fams exclusive to clade1 - excluding introgressed strains
+exclusive_to_clade1_no_intro<- clade1_no_intro[(clade1_no_intro$totals > 0) & 
+                                                 (clade2_no_intro$totals == 0) &
+                                                 (clade3_no_intro$totals == 0),]
+
+nrow(exclusive_to_clade1_no_intro)
+
+aveclade1_no_intro<- nrow(exclusive_to_clade1_no_intro) / 195 #there are 1256 accessory gene fams exclusive to clade 1 (1062  using PIRATE)
+round(aveclade1_no_intro) #ave is 6 (still)
+
+tail(sort(exclusive_to_clade1_no_intro$totals)) # most abundant gene fam is present in in 157 of the 195 isolates in clade1
+
+
+length(195)*.90 
+#get all present in more than 90% of the isolates in that clade
+exclusive_to_clade1_of_note_no_intro<- exclusive_to_clade1_no_intro[exclusive_to_clade1_no_intro$totals > 195*.90,]
+dim(exclusive_to_clade1_of_note_no_intro)
+#there are no gene fams in =>95% of the strains in clade 1
+exclusive_to_clade1_of_note_no_intro
+
+
+
 #exclusive to clade2
 exclusive_to_clade2<- clade2[(clade2$totals > 0) & 
                                (clade1$totals == 0) &
@@ -763,6 +832,20 @@ length(clade2_names) #there are 45 isolates in clade 2
 tail(sort(exclusive_to_clade2$totals)) #most abundant appear in 42 of the of the 45 isolates (two gene fams)
 exclusive_to_clade2_of_note<- exclusive_to_clade2[exclusive_to_clade2$totals > length(clade2_names)*.90,]
 dim(exclusive_to_clade2_of_note) #2 clade-defining gains in Clade 2: OG0010568 & OG0010571
+
+
+#exclusive to clade2 excluding introgressed strains
+exclusive_to_clade2_no_intro<- clade2_no_intro[(clade2_no_intro$totals > 0) & 
+                                                 (clade1_no_intro$totals == 0) &
+                                                 (clade3_no_intro$totals == 0),]
+
+dim(exclusive_to_clade2_no_intro) #there are 97 gene fams exclusive to clade2
+aveclade2_no_intro<- nrow(exclusive_to_clade2_no_intro) / 42
+round(aveclade2_no_intro) #ave is 2
+tail(sort(exclusive_to_clade2_no_intro$totals)) #most abundant appear in 40 of the of the 42 isolates (two gene fams)
+exclusive_to_clade2_of_note_no_intro<- exclusive_to_clade2_no_intro[exclusive_to_clade2_no_intro$totals > 42*.90,]
+dim(exclusive_to_clade2_of_note_no_intro) #3 clade-defining gains in Clade 2: OG0010514 (new) plus OG0010568 & OG0010571, which were found previously
+
 
 
 #exclusive to clade3
@@ -780,6 +863,25 @@ tail(sort(exclusive_to_clade3$totals))
 #there are 115 accessory gene fams exclusive to clade3, some in all 15 isolates
 exclusive_to_clade3_of_note<- exclusive_to_clade3[exclusive_to_clade3$totals > length(clade3_names)*.90,]
 dim(exclusive_to_clade3_of_note) #23 are present in more than > 90% of all isolates
+
+#should not be any different for clade 3 for introgressed but check. 
+#exclusive to clade3
+exclusive_to_clade3_no_intro<- clade3_no_intro[(clade3_no_intro$totals > 0) & 
+                                                 (clade1_no_intro$totals == 0) &
+                                                 (clade2_no_intro$totals == 0),]
+
+
+dim(exclusive_to_clade3_no_intro) 
+aveclade3_no_intro<- nrow(exclusive_to_clade3_no_intro) / 15
+round(aveclade3_no_intro) #ave is 8
+
+
+tail(sort(exclusive_to_clade3$totals))
+#there are 115 accessory gene fams exclusive to clade3, some in all 15 isolates
+exclusive_to_clade3_of_note_no_intro<- exclusive_to_clade3_no_intro[exclusive_to_clade3_no_intro$totals > 15*.90,]
+dim(exclusive_to_clade3_of_note_no_intro) #23 are present in more than > 90% of all isolates
+
+
 
 ##graph distribution of accesory genes by clade 
 #calculate percentage of genomes of all in clade that unique gene family is found in
@@ -1132,4 +1234,3 @@ total_MAT2
 #ratio
 all_mat_ratio<- reduce.fraction(c(total_MAT1, total_MAT2))
 all_mat_ratio #can't be reduced 
-
