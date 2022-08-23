@@ -20,7 +20,7 @@ This script removes high LD sites at a 0.2 threshold value.<br>
 **03_downsample.vcf**<br>
 This script downsamples the VCF to 80% of the SNP sites replicated ten times - these VCFs are ultimately used to calculate the optimum m value in OptM, which will error if any SD values between subsamples are 0 (which can happen, particularly if your data is really clean). Taking random draws ensures there will be some variation.<br>
 
-**04_vcf_to_TreeMix_downsamples.sh**<br>
+**04_vcf_to_TreeMix_downsample.sh**<br>
 This script converts the vcf to the treemix format required by treemix. It uses 04_plink2treemix.py. Note, this is the loop version to run on the downsampled reps.<br>
 
 **04_plink2treemix.py**<br>
