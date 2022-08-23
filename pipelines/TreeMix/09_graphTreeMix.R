@@ -1,4 +1,4 @@
-#This script generates a TreeMix plot for the A.fumigatus pan genome dataset
+#generates a TreeMix plot for the A.fumigatus pan genome dataset
 
 #######
 
