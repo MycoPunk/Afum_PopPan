@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#SBATCH --job-name=downsample_VFC
+#SBATCH --output=logs/downsample_VCF.%a.log
+#SBATCH --mail-user=lotuslofgren@gmail.com
+#SBATCH --mail-type=FAIL,END
+#SBATCH --time=2:00:00
+#SBATCH --mem=10G
+#SBATCH --nodes=1
+#SBATCH --ntasks=2
+#SBATCH --cpus-per-task=8
+#SBATCH --partition=common
+
+# This script downsamples the pruned vcf file to a random 80% of all SNPS to avoid issues to SD = 0 across iterations in the optM estimate of m migration edges
+
+#load modules
+module load bcftools
+
+#total n SNPS
+bcftools view Afum_global_v3.LofgrenPanGenome.SNP.combined_selected_NO_INV.vcf.LDpruned.vcf.gz | grep -v "^#" | wc -l
+
+#randomly sample 80% of SNPS - here, J sets the seed randomly, but keeps track of it in the output file. 
+for N in {1..10}; do \
+J=( $RANDOM % 1000 + 500 ) #set random seed
+bcftools view Afum_global_v3.LofgrenPanGenome.SNP.combined_selected_NO_INV.vcf.LDpruned.vcf.gz | perl -nle 'BEGIN {$J} if (/^#/){ print; next }; print if rand(1) < 0.80' | bcftools view -O z - -o A_fum_80perSNPs_${J}_seed$
+done
+
+#remove invariant sites 
+for N in {1..10}; do \
+bcftools view -c 1 *seed_itteration_${N}.vcf.gz -O z -o VCF_samp_${N}.recode_noinv.vcf.gz
+done
