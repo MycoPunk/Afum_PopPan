@@ -10,6 +10,7 @@ Afischeri	Afischeri	outgroup
 117535A-1.1	117535A-1.1	Clade_1.2
 ...
 ```
+Here, we are using sub-populations infered using DAPCA. 
 
 **01_remove_missing_sites.sh**<br>
 This script removes missing sites from the main VCF (TreeMix does not like missing data).<br>
