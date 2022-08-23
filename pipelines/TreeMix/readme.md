@@ -27,7 +27,7 @@ This script converts the vcf to the treemix format required by treemix. It uses 
 This is a.py (v2) script modified from one written by Joana Meier for format conversion.<br>
 
 **05_runTreeMix_downsample.sh**<br> 
-This script runs TreeMix with no migration edges as an input for OptM.<br>
+This script runs TreeMix with no migration edges as an input for OptM. Note, setting k has little effect here as we've already pruned out high LD sites, so we just exclude the blocking call.<br>
 
 **06_run_optM.R**<br> 
 This script runs optM and produces graphs used to determine the optimum number of migration edges.<br>
