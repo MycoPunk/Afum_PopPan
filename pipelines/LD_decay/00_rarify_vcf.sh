@@ -6,7 +6,7 @@ module load vcftools
 module load bcftools 
 mkdir temp
 
-#randomly sort text files of strain names and take the first 8 lines (20 times for each clade). 
+#randomly sort text files of strain names and take the first 12 lines (20 times for each clade). 
 for N in {1..20}; do \
    sort -R Clade_1_members.txt | head -n 12 > temp/C1_sample_temp${N}.txt
 done
