@@ -3,7 +3,7 @@ This pipeline calculates Linkage Disequilibrium Decay.
 In the main directory, we have a set of .txt files (Clade_1_members.txt, Clade_2_members.txt, Clade_3_members.txt, and all_members.txt) that consist of lists of species names for each clade (clade membership determined previously using DAPCA) or all strains regardless of clade
 
 ```
->cat Clade_3_members.txt
+>head Clade_3_members.txt
 CM2495
 CM2730
 CM2733
@@ -40,5 +40,6 @@ The input file for graphing is a tab sep. file with three cols:
 dist	rsq.mean	rsq.count
 1	0.581519357409793	9265
 2	0.320409893703116	5134
-3	0.296468160427894	5562 ... 
+3	0.296468160427894	5562
+... 
 ```
