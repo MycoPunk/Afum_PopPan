@@ -32,4 +32,13 @@ This script creates a summary of pairwise distances w/ distance in the first col
 
 **05_average_summaries_all.sh** runs th script **05_average_summaries_all.R** which averages the mean R2 value for each distance for each itteration, generating 1 file per group (clades 1-3 or all).
 
-**06_plot_LD_decay.sh** runs the script **06_plot_LD_decay.R** to calculate LD decay in BP and plot the figures presented in the paper. 
+**06_plot_LD_decay.sh** runs the script **06_plot_LD_decay.R** to calculate LD decay in BP and plot the figures presented in the paper.<br>
+The input file for graphing is a tab sep. file with three cols: 
+
+```
+>head rsq_means_all_samples_all_clades.tab
+dist	rsq.mean	rsq.count
+1	0.581519357409793	9265
+2	0.320409893703116	5134
+3	0.296468160427894	5562 ... 
+```
